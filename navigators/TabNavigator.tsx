@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AntDesign,Octicons,MaterialCommunityIcons,MaterialIcons } from '@expo/vector-icons';
 import {StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle} from 'react-native';
 import {BottomTabBarButtonProps, createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import { COLORS, FONTSIZE, SPACING } from '../themes/themes';
-import HomeStackNavigatorScreen from './stack/HomeStackNavigatorScreen';
-import MyListStackNavigatorScreen from './stack/MyListStackNavigatorScreen';
-import BrowseStackNavigatorScreen from './stack/BrowseStackNavigatorScreen';
-import ScheduleStackNavigatorScreen from './stack/ScheduleStackNavigatorScreen';
-import UserStackNavigatorScreen from './stack/UserStackNavigatorScreen';
+import HomeScreen from '../views/HomeScreen';
+import MyListScreen from '../views/MyListScreen';
+import BrowseScreen from '../views/BrowseScreen';
+import SchedulesScreen from '../views/SchedulesScreen';
+import { useIsFocused } from '@react-navigation/native';
+import * as NavigationBar from 'expo-navigation-bar';
+import UserScreen from '../views/UserScreen';
+
 const Tab = createBottomTabNavigator();
 
 interface CustomTabButtonProps extends BottomTabBarButtonProps {
@@ -28,9 +31,19 @@ const CustomTabButton: React.FC<CustomTabButtonProps> = ({ children, onPress, st
 };
 
 const TabNavigator = () => {
+  
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      NavigationBar.setBackgroundColorAsync(COLORS.BlackRGB90);
+    }
+  }, [isFocused]);
+  
+
   return (
     <Tab.Navigator
-      initialRouteName="UserStack"
+      initialRouteName="User"
       backBehavior="history"
       screenOptions={{
         tabBarHideOnKeyboard: true,
@@ -44,7 +57,7 @@ const TabNavigator = () => {
         tabBarShowLabel: false,
       }}
     >
-      <Tab.Screen name="HomeStack" component={HomeStackNavigatorScreen} options={{
+      <Tab.Screen name="Home" component={HomeScreen} options={{
         tabBarIcon: ({focused}) => {
           return (
             <View
@@ -61,7 +74,7 @@ const TabNavigator = () => {
         },
         tabBarButton: (props) => <CustomTabButton {...props} />
       }}/>
-      <Tab.Screen name="MyListStack" component={MyListStackNavigatorScreen}  options={{
+      <Tab.Screen name="MyList" component={MyListScreen}  options={{
         tabBarIcon: ({focused}) => {
           return (
             <View
@@ -78,7 +91,7 @@ const TabNavigator = () => {
         },
         tabBarButton: (props) => <CustomTabButton {...props} />
       }}/>
-      <Tab.Screen name="BrowseStack" component={BrowseStackNavigatorScreen}  options={{
+      <Tab.Screen name="Browse" component={BrowseScreen}  options={{
         tabBarIcon: ({focused}) => {
           return (
             <View
@@ -95,7 +108,7 @@ const TabNavigator = () => {
         },
         tabBarButton: (props) => <CustomTabButton {...props} />
       }}/>
-      <Tab.Screen name="ScheduleStack" component={ScheduleStackNavigatorScreen}  options={{
+      <Tab.Screen name="Schedule" component={SchedulesScreen}  options={{
         tabBarIcon: ({focused}) => {
           return (
             <View
@@ -112,7 +125,7 @@ const TabNavigator = () => {
         },
         tabBarButton: (props) => <CustomTabButton {...props} />
       }}/>
-      <Tab.Screen name="UserStack" component={UserStackNavigatorScreen}  options={{
+      <Tab.Screen name="User" component={UserScreen}  options={{
         tabBarIcon: ({focused}) => {
           return (
             <View

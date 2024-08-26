@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { animeCharacter } from '../api/apicalls'
 import axios from 'axios';
 import { COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes';
-import CharacterAvatarCard from '../components/CharacterAvatarCard';
-import CharacterAvatarCardSkeleton from '../components/CharacterAvatarCardSkeleton';
+import CharacterAvatarCard from './AvatarCardWithName';
+import CharacterAvatarCardSkeleton from './AvatarCardWithNameSkeleton';
 import NoDataAvailable from '../components/NoDataAvailable';
 
 const { width } = Dimensions.get("screen")
@@ -30,14 +30,13 @@ const AnimeCharactersList = ({id,navigation}:{id:number,navigation:any}) => {
             const { data } = await getAnimeCharacters(id);
             setAnimeCharacters(data);
         })();
-    },[id])
-
-    useEffect(()=>{
+        
         const timeOutId = setTimeout(()=>setIsLoadingData(false),500);
+
         return  ()=>{
             clearTimeout(timeOutId);
         }
-    },[animeCharacters])
+    },[id])
     
     return (
         <View style={{width:width,backgroundColor:COLORS.Black,padding:SPACING.space_15}}>
@@ -52,10 +51,10 @@ const AnimeCharactersList = ({id,navigation}:{id:number,navigation:any}) => {
                     }}
                 />
             ):(
-                animeCharacters.length>=1?<FlatList data={animeCharacters} bounces={false} scrollEnabled={false} 
+                animeCharacters.length!==0?<FlatList data={animeCharacters} bounces={false} scrollEnabled={false} 
                 showsVerticalScrollIndicator={false} numColumns={3}  keyExtractor={(item,index) => String(index)} columnWrapperStyle={{gap:SPACING.space_10}} contentContainerStyle={{gap:SPACING.space_10}} renderItem={({item,index})=>{
                     return (
-                        <CharacterAvatarCard id={item.mal_id} name={item.character.name} characterImg={item.character.images.jpg.image_url} navigation={navigation}/>
+                        <CharacterAvatarCard id={item.character.mal_id} name={item.character.name} image={item.character.images.jpg.image_url} navigate={()=>navigation.navigate("CharacterDetails",{id:item.character.mal_id})}/>
                     )
                 }}/>:<NoDataAvailable heading='No data available' subHeading='Will be updated shortly'/>
             )}

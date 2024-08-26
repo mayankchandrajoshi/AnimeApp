@@ -5,7 +5,7 @@ import { BORDERRADIUS, COLORS, FONTSIZE, SPACING } from '../themes/themes';
 
 const { width } = Dimensions.get("screen")
 
-const CharacterAvatarCardSkeleton = () => {
+const AvatarCardWithNameSkeleton = () => {
     const cardWidth = width / 3;
     const cardHeight = cardWidth * 1.3;
     const smallerRectWidth = cardWidth * 0.8;
@@ -48,6 +48,6 @@ const CharacterAvatarCardSkeleton = () => {
     );
 }
 
-export default CharacterAvatarCardSkeleton
+export default AvatarCardWithNameSkeleton
 
 const styles = StyleSheet.create({})

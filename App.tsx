@@ -9,8 +9,10 @@ import CharacterDetailsScreen from './views/CharacterDetailsScreen';
 import VoiceActorDetailsScreen from './views/VoiceActorDetailsScreen';
 import SearchScreen from './views/SearchScreen';
 import SWFFilterScreen from './views/SWFFilterScreen';
-import { COLORS } from './themes/themes';
 import { StatusBar } from 'react-native';
+import EpisodesDetailsScreen from './views/EpisodesDetailsScreen';
+import LogoutScreen from './views/LogoutScreen';
+import GenresAnimeScreen from './views/GenreAnimeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,7 +46,8 @@ export default function App() {
   }
   return (
     <NavigationContainer>
-       <Stack.Navigator screenOptions={{headerShown: false}}>
+      <StatusBar translucent backgroundColor={'transparent'} />
+      <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen
           name="Tab"
           component={TabNavigator}
@@ -55,26 +58,42 @@ export default function App() {
           component={AnimeDetailsScreen}
           options={{animation: 'slide_from_right'}}
         />
-      <Stack.Screen
-        name="CharacterDetails"
-        component={CharacterDetailsScreen}
-        options={{animation: 'slide_from_right'}}
-      />
-      <Stack.Screen
-        name="VoiceActorDetails"
-        component={VoiceActorDetailsScreen}
-        options={{animation: 'slide_from_right'}}
-      />
-      <Stack.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{animation: 'slide_from_right'}}
-      />
-      <Stack.Group screenOptions={{ presentation: 'modal' ,animation : 'slide_from_bottom',animationDuration:500}}>
-        <Stack.Screen name="SWFModal" component={SWFFilterScreen}/>
-      </Stack.Group>
+        <Stack.Screen
+          name="EpisodesDetails"
+          component={EpisodesDetailsScreen}
+          options={{animation: 'slide_from_left'}}
+        />
+        <Stack.Screen
+          name="CharacterDetails"
+          component={CharacterDetailsScreen}
+          options={{animation: 'slide_from_right'}}
+        />
+        <Stack.Screen
+          name="VoiceActorDetails"
+          component={VoiceActorDetailsScreen}
+          options={{animation: 'slide_from_right'}}
+        />
+        <Stack.Screen
+          name="GenreAnime"
+          component={GenresAnimeScreen}
+          options={{animation: 'slide_from_right'}}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{animation: 'slide_from_right'}}
+        />
+        <Stack.Group screenOptions={{ presentation: 'transparentModal' ,animation : 'fade',animationDuration:500}}>
+          <Stack.Screen 
+            name="SWFModal" 
+            component={SWFFilterScreen}
+          />
+          <Stack.Screen
+            name="Logout"
+            component={LogoutScreen}
+          />
+        </Stack.Group>
       </Stack.Navigator>
-      <StatusBar translucent backgroundColor={'transparent'}/>
     </NavigationContainer>
   );
 }

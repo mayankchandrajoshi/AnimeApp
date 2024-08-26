@@ -21,7 +21,6 @@ export default NoDataAvailable
 
 const styles = StyleSheet.create({
     container : {
-        flex:1,
         minHeight:height*.6,
         justifyContent:"center",
         gap : SPACING.space_12,

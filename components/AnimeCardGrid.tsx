@@ -18,27 +18,27 @@ interface AnimeCardGridProps {
 }
 
 const AnimeCardGrid:React.FC<AnimeCardGridProps> = ({isLoadingData,isAllDataLoaded,animeList,page,fetchMoreAnime,viewAnime,navigation}) => {
-  return (
-    <View style={styles.container}>
-        {isLoadingData?<FlatList data={new Array(16)} numColumns={2} keyExtractor={(item,index) => String(index)}
-            style={[styles.cardsWrapper,{ paddingHorizontal:SPACING.space_15 }]} 
-            columnWrapperStyle = {styles.cardsWrapperRow}
-            renderItem={({item})=><AnimeCardSkeleton/>}
-        />:(
-            animeList.length!==0?<FlatList data={animeList} numColumns={2}
-            onEndReached={()=>fetchMoreAnime(page)}  
-            onEndReachedThreshold={0.8}
-            keyExtractor={(item,index) => String(index)}
-            style={[styles.cardsWrapper]} 
-            columnWrapperStyle = {styles.cardsWrapperRow}
-            renderItem={({item,index})=><View style={styles.cardWrapper}><AnimeCard id={item.mal_id} name ={item.title_english?item.title_english:item.title} image_url ={item.images.jpg.large_image_url?item.images.jpg.large_image_url:item.images.jpg.image_url} type ={item.type} width={(width/2)-(SPACING.space_15+SPACING.space_10/2)} index={index%2} isBoundaryCard={true} viewAnime={(id:number)=>{viewAnime(id)}} /></View>}
-            ListFooterComponent={
-                !isAllDataLoaded ? <View style={{paddingVertical:SPACING.space_15}}><ActivityIndicator size="large" color={COLORS.OrangeRed}/></View> : null
-            }
-            />:<NoAnimeScreen heading="No Anime found" subHeading='Explore more anime' navigation={navigation}/>
-        )}
-</View>
-  )
+    return (
+        <View style={styles.container}>
+            {isLoadingData?<FlatList data={new Array(16)} numColumns={2} keyExtractor={(item,index) => String(index)}
+                style={[styles.cardsWrapper,{ paddingHorizontal:SPACING.space_15 }]} 
+                columnWrapperStyle = {styles.cardsWrapperRow}
+                renderItem={({item})=><AnimeCardSkeleton/>}
+            />:(
+                animeList.length!==0?<FlatList data={animeList} numColumns={2}
+                onEndReached={()=>fetchMoreAnime(page)}  
+                onEndReachedThreshold={0.8}
+                keyExtractor={(item,index) => String(index)}
+                style={[styles.cardsWrapper]} 
+                columnWrapperStyle = {styles.cardsWrapperRow}
+                renderItem={({item,index})=><View style={styles.cardWrapper}><AnimeCard id={item.mal_id} name ={item.title_english||item.title} image_url ={item.images.jpg.large_image_url||item.images.jpg.image_url} type ={item.type} width={(width/2)-(SPACING.space_15+SPACING.space_10/2)} index={index%2} isBoundaryCard={true} viewAnime={(id:number)=>{viewAnime(id)}} /></View>}
+                ListFooterComponent={
+                    !isAllDataLoaded ? <View style={{paddingVertical:SPACING.space_15}}><ActivityIndicator size="large" color={COLORS.OrangeRed}/></View> : null
+                }
+                />:<NoAnimeScreen heading="No Anime found" subHeading='Explore more anime' navigation={navigation}/>
+            )}
+        </View>
+    )
 }
 
 export default AnimeCardGrid

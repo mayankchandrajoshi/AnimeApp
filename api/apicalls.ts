@@ -61,7 +61,7 @@ export const animeDetails = (id: number) => {
 }
 
 export const animeEpisodes = (id: number , page: number = 1) => {
-    return `https://api.jikan.moe/v4/anime/${id}/episodes&page=${page}`
+    return `https://api.jikan.moe/v4/anime/${id}/episodes?page=${page}`
 }
 
 export const animeSingleEpisode = (id: number ,episode: number) => {
@@ -76,10 +76,6 @@ export const characterDetails = (id: number) => {
     return `https://api.jikan.moe/v4/characters/${id}`
 }
 
-export const characterImages = (id: number) => {
-    return  `https://api.jikan.moe/v4/characters/${id}/pictures`
-}
-
 export const characterVoiceActor = (id:number) =>{
     return `https://api.jikan.moe/v4/characters/${id}/voices`
 }
@@ -88,12 +84,8 @@ export const personDetails = (id:number) => {
     return `https://api.jikan.moe/v4/people/${id}`
 }
 
-export const personPicture = (id:number) => {
-    return `https://api.jikan.moe/v4/people/${id}/pictures`
-}
-
-export const personAnime = (id:number) => {
-    return `https://api.jikan.moe/v4/people/${id}/anime`
+export const personVoices = (id:number) => {
+    return `https://api.jikan.moe/v4/people/${id}/voices`
 }
 
 export const animeRecommendation = (id: number) => {

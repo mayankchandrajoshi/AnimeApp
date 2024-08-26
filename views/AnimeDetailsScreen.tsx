@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, Image, Dimensions, Animated, Vibration, Share, TouchableOpacity, Modal, StatusBar } from 'react-native'
+import { View, Text, StyleSheet, Pressable, ScrollView, Image, Dimensions, Animated, Vibration, Share, TouchableOpacity, Modal, StatusBar, ActivityIndicator } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { RootStackParamList } from '../types/navigationTypes';
 import { RouteProp, useRoute } from '@react-navigation/native';
@@ -16,6 +16,9 @@ import favoriteListStore from '../store/favoriteListStore';
 import watchedListStore from '../store/watchedListStore';
 import AnimeCharactersList from '../components/AnimeCharactersList';
 import ScreenSelectionCarousal from '../components/ScreenSelectionCarousal';
+import AnimeEpisodesList from '../components/AnimeEpisodesList';
+import RecommendedAnimeList from '../components/RecommendedAnimeList';
+import * as NavigationBar from 'expo-navigation-bar';
 
 const { width:windowWidth,height:windowHeight } = Dimensions.get("window");
 const { width:screenWidth,height:screenHeight } = Dimensions.get("screen");
@@ -106,12 +109,16 @@ const AnimeDetailsScreen = ({navigation}:any) => {
   const Screens = [
     {
       name: "Episodes",
-      component: (navigation: any) => <AnimeCharactersList navigation={navigation} id={id} />
+      component: (navigation: any) => <AnimeEpisodesList navigation={navigation} id={id} />
     },
     {
       name: "Characters",
       component: (navigation: any) => <AnimeCharactersList navigation={navigation} id={id} />
     },
+    {
+      name : "Recommended",
+      component: (navigation: any) => <RecommendedAnimeList navigation={navigation} id={id} />
+    }
   ];
 
   const { isSWFEnabled } = swfFilterStore();
@@ -142,6 +149,7 @@ const AnimeDetailsScreen = ({navigation}:any) => {
 
   useEffect(()=>{
     (async()=>{
+      NavigationBar.setBackgroundColorAsync(COLORS.Black);
       const { data } = await getAnimeDetails(id);
       setAnimeDetails(data);
       setActionList(getActionList(id, data.name,data.images.jpg.large_image_url?data.images.jpg.large_image_url:data.images.jpg.image_url,data.type, watchList, addToWatchList, removeFromWatchList, isAnimeInWatchList , watchedList, addToWatchedList, removeFromWatchedList, isAnimeInWatchedList ,favoriteList, addToFavoriteList, removeFromFavoriteList,isAnimeInFavoriteList))
@@ -165,7 +173,45 @@ const AnimeDetailsScreen = ({navigation}:any) => {
       extrapolate: 'clamp',
   });
 
-  if(!animeDetails) return <View></View>
+  if(!animeDetails) return <View style={{flex:1,backgroundColor:COLORS.Black}}>
+    <LinearGradient colors={[COLORS.Black,COLORS.BlackRGB90,COLORS.BlackRGB85,COLORS.BlackRGB60,'transparent']} locations={[.25,.5,.6,.8,1]} style={[styles.subContainer]}>
+      <Animated.View style={[{backgroundColor:backgroundColorBackBtn,padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_20}]}>
+          <Pressable onPress={()=>navigation.goBack()} onPressIn={animateColorPressInBackBtn} onPressOut={()=>{animateColorPressOutBackBtn();setTimeout(()=>setShowBackBtnTooltip(false),700)}} onLongPress={()=>{Vibration.vibrate(100);setShowBackBtnTooltip(true)}}>
+            <MaterialIcons name="arrow-back" size={FONTSIZE.size_24} color={COLORS.White} />
+            {showBackBtnTooltip && <Text style={[styles.iconToolTip,{ width : 70,left : "0%", }]}>
+              Back
+          </Text>}
+          </Pressable>
+      </Animated.View>
+      <View style={styles.moreOptionsContainer}>
+        <Pressable 
+          style={[
+            styles.swfContainer,
+            isSWFEnabled?{backgroundColor:COLORS.Lime}:{backgroundColor:COLORS.Red}
+          ]}
+          onPress={()=>{navigation.navigate('SWFModal');}}
+      >
+          <Text style={styles.swf}>
+            {
+              isSWFEnabled?"SWF":"NSWF"
+            }
+          </Text>
+      </Pressable>
+          <Pressable onPress={handleViewMenu} onPressIn={animateColorPressInMoreOptionsBtn} onPressOut={()=>{animateColorPressOutMoreOptionsBtn();setTimeout(()=>setShowMoreOptionsBtnTooltip(false),700)}} onLongPress={()=>{Vibration.vibrate(100);setShowMoreOptionsBtnTooltip(true)}}>
+              <Animated.View ref={moreOptionsRef} style={[{backgroundColor:backgroundColorMoreOptionsBtn,padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_20}]}>
+                <Feather name="more-vertical" size={FONTSIZE.size_24} color={COLORS.White} />
+              </Animated.View>
+              {showMoreOptionsBtnTooltip && <Text style={[styles.iconToolTip,{ width : 140,bottom:'-100%',right : "0%" }]}>
+                More Options
+            </Text>}
+            </Pressable>
+          {showMoreOptions&&<QuickActionList actionMenu={actionList} isShowMenu setIsShowMenu={setShowMoreOptions} top={moreOptionsPositionTop-statusBarHeight} left={moreOptionsPositionLeft}/>}
+      </View>
+    </LinearGradient>
+    <View style={{flex:1,justifyContent:"center",alignItems:"center"}}>
+        <ActivityIndicator size={"large"} color={COLORS.OrangeRed}/>
+    </View>
+  </View>
 
   return (
     <View style={styles.container}>

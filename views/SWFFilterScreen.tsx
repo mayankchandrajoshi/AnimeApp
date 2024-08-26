@@ -2,6 +2,7 @@ import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import swfFilterStore from '../store/swfFilterStore';
+import statusBarHeight from '../utils/getStatusBarHeight';
 
 const { height } = Dimensions.get("screen");
 
@@ -73,8 +74,9 @@ export default SWFFilterScreen
 
 const styles = StyleSheet.create({
     screenContainer : {
+        flex:1,
         backgroundColor : COLORS.Black,
-        minHeight : height,
+        paddingTop : statusBarHeight + SPACING.space_15, 
     },
     headerContainer : {
         marginHorizontal : SPACING.space_15,

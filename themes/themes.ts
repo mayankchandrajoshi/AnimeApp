@@ -18,6 +18,8 @@ interface Spacing {
     space_44: number;
     space_48: number;
     space_52: number;
+    space_56: number;
+    space_60: number;
 }
 
 export const SPACING: Spacing = {
@@ -40,6 +42,8 @@ export const SPACING: Spacing = {
     space_44: 44,
     space_48: 48,
     space_52: 52,
+    space_56: 56,
+    space_60: 60,
 };
 
 
@@ -58,6 +62,9 @@ interface Color {
     Orange: string;
     DarkOrange: string;
     OrangeRed: string;
+    OrangeRed90: string;
+    OrangeRed60: string;
+    OrangeRed30: string;
     Red : string,
     Tomato: string,
     Grey: string;
@@ -90,6 +97,9 @@ export const COLORS: Color = {
     Orange: '#FFA500',
     DarkOrange: '#FF8C00',
     OrangeRed: '#FF4500',
+    OrangeRed90: "rgba(255,69,0,.9)",
+    OrangeRed60: "rgba(255,69,0,.6)",
+    OrangeRed30: "rgba(255,69,0,.3)",
     Red : "#FF0000",
     Tomato: '#FF6347',
     Grey: "#808080",

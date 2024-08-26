@@ -5,16 +5,16 @@ import { COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 
 const { width } = Dimensions.get("screen")
 
-const CharacterAvatarCard:React.FC<{id:number,characterImg:string,name:string,navigation:any}> = ({id,characterImg,name,navigation}) => {
+const AvatarCardWithName:React.FC<{id:number,image:string,name:string,navigate:()=>VideoDecoderInit}> = ({id,image,name,navigate}) => {
   return (
-    <Pressable onPress={()=>{navigation.navigate("CharacterDetails",{id})}} style={styles.wrapper}>
-        <Image source={{uri:characterImg}} alt='character_image' style={styles.image}/>
+    <Pressable onPress={navigate} style={styles.wrapper}>
+        <Image source={{uri:image}} alt='avatar' style={styles.image}/>
         <Text style={styles.text} numberOfLines={2}>{name}</Text>
     </Pressable>
   )
 }
 
-export default CharacterAvatarCard
+export default AvatarCardWithName
 
 const styles = StyleSheet.create({
     wrapper : {
