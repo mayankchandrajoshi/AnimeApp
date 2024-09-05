@@ -158,13 +158,14 @@ const styles = StyleSheet.create({
         fontSize : FONTSIZE.size_14,
         color : COLORS.WhiteRGBA90,
         textTransform : "uppercase",
-        marginBottom : SPACING.space_12
+        // marginBottom : SPACING.space_12
     },
     filterOptionsWrapper : {
-        gap : SPACING.space_28
+        // gap : SPACING.space_28
     },
     filterOptionContainer : {
         backgroundColor : COLORS.Black,
+        paddingVertical : SPACING.space_14,
         flexDirection : "row",
         gap : SPACING.space_16
     },

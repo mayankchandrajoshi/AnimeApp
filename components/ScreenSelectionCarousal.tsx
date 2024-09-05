@@ -1,119 +1,161 @@
 import { Animated, Dimensions, FlatList, Pressable, StyleSheet, Text, View, ViewToken } from 'react-native'
-import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
+import React, { forwardRef, memo, useCallback, useMemo, useRef, useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import useAnimatedPress from '../utils/animatedPress'
-import estimateTextWidth from '../utils/estimateTextWidth'
+import { ActivityIndicator } from 'react-native-paper'
 
 const { width } = Dimensions.get("screen")
 
 interface TabPropsInterface {
     item: {
         name: string;
-        component: (navigation: any) => React.JSX.Element;
+        component:  React.JSX.Element;
     },
     index : number,
-    currentActiveIndex:number,
-    setCurrentActiveIndex:React.Dispatch<React.SetStateAction<number>>,
     scrollToIndex:(index:number)=>void,
-    setCurrentActiveList : React.Dispatch<React.SetStateAction<1|2>>
+    scrollX : Animated.Value
 }
 
-const Tab:React.FC<TabPropsInterface> = ({ item,index,currentActiveIndex,setCurrentActiveIndex,scrollToIndex,setCurrentActiveList }) =>{
+const Tab:React.FC<TabPropsInterface> = memo(({ item,index,scrollToIndex,scrollX }) =>{
 
     const {backgroundColor,animateColorPressIn,animateColorPressOut,} = useAnimatedPress("transparent", COLORS.WhiteRGBA15,200,400);
+
+    const color = scrollX.interpolate({
+      inputRange : [(index - 1) * width, index * width, (index + 1) * width],
+      outputRange: [COLORS.WhiteRGBA75, COLORS.White, COLORS.WhiteRGBA75],
+      extrapolate: 'clamp',
+    });
 
     return (
         <Animated.View style={[{ backgroundColor }]} >
             <Pressable 
-                onPress={()=>{setCurrentActiveIndex(index);scrollToIndex(index);setCurrentActiveList(2)}}
+                onPress={()=>{scrollToIndex(index)}}
                 onPressIn={animateColorPressIn}
                 onPressOut={animateColorPressOut}
             >
-                <Animated.Text style={[styles.headerListText,currentActiveIndex===index?{color : COLORS.White}:{color : COLORS.WhiteRGBA75}]}>
+                <Animated.Text style={[styles.headerListText,{ color }]}>
                     {item.name}
                 </Animated.Text>
             </Pressable>
         </Animated.View>
     )
-}
+})
 
 interface IndicatorProps {
     scrollX:Animated.Value,
-    screenTitleWidths: number[],
-    screenTitlePosX: number[]
+    screenTitlesWidth : number[],
+    screenTabPosX : number[],
+    scrollXTabs : Animated.AnimatedInterpolation<string | number>
 }
 
-const Indicator = forwardRef<View, IndicatorProps>(({scrollX,screenTitlePosX,screenTitleWidths}, ref) => {
-
-    if(screenTitlePosX.length<2) return <View></View>
+const Indicator = memo(forwardRef<View, IndicatorProps>(({scrollX,screenTitlesWidth,screenTabPosX,scrollXTabs}, ref) => {
     
-    const inputRange = screenTitleWidths.map((_,i)=>i*width);
+    const inputRange = screenTitlesWidth.map((_,i)=>i*width);
 
     const indicatorWidth = scrollX.interpolate ({
         inputRange,
-        outputRange :  screenTitleWidths.map((titleWidth)=>titleWidth)
+        outputRange :  screenTitlesWidth.map((width)=>width),
+        extrapolate : 'clamp'
     })
 
     const positionLeft = scrollX.interpolate ({
         inputRange,
-        outputRange : screenTitlePosX.map((posX,index)=>{
-
-            if(index===screenTitlePosX.length-1){
-                if(screenTitlePosX[index]+screenTitleWidths[index]>width) return width-screenTitleWidths[index]-10;
-                else return screenTitlePosX[index];
-            }
-
-            if(posX>width/2){
-                return width/2;
-            }
-
-            return posX;
-        })
+        outputRange : screenTabPosX.map((tabPosX,currIndex)=>{
+            return tabPosX;
+        }),
+        extrapolate : 'clamp'
     })
 
+    const combinedLeftPos = Animated.subtract(positionLeft, scrollXTabs);
     return (
-        <Animated.View style={[styles.currentActiveBar, { width: indicatorWidth,left: positionLeft}]} ref={ref}/>
+        <Animated.View style={[styles.currentActiveBar, { width: indicatorWidth,left: combinedLeftPos}]} ref={ref}/>
     )
-})
+}))
 
+interface  ScreenWrapperProps {
+    maxIndexVisited:number,
+    component: (navigation: any) => React.JSX.Element,
+    index : number,
+    navigation : any
+}
 
-const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (navigation: any) =>React.JSX.Element }[], navigation: any }> = ({screens,navigation}) => {
+const ScreenWrapper : React.FC<ScreenWrapperProps> = ({maxIndexVisited,component,index,navigation})=>{
+    if(index>maxIndexVisited){
+        return (
+            <View style={{width:width,justifyContent:"center",alignItems:"center",backgroundColor:COLORS.WhiteRGBA15}}>
+                <ActivityIndicator size="large" color={COLORS.OrangeRed}/>
+            </View>
+        )
+    }
+    return component(navigation);
+}
 
-    const [ currentActiveIndex,setCurrentActiveIndex ] = useState(0);
-
-    const [ screenTitleWidths, setScreenTitleWidths ] = useState<number[]>([]);
-    const [ screenTitlePosX, setScreenTitlePosX ] = useState<number[]>([]);
-    const [ currentActiveList,setCurrentActiveList ] = useState<1|2>(2);
+const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (navigation: any) => React.JSX.Element ,width:number }[], navigation: any }> = ({screens,navigation}) => {
 
     const scrollX = useRef(new Animated.Value(0)).current;
-    const scrollXTabs = useRef(new Animated.Value(0)).current;
-
-    const screenListRef = useRef<FlatList>(null);
-    const tabsListRef = useRef<FlatList>(null);
+    
+    const tabListRef = useRef<FlatList>(null);
     const indicatorRef = useRef<View>(null);
+    const screenListRef = useRef<FlatList>(null);
+    
+    const [ maxIndexVisited,setMaxIndexVisited ] = useState(0);
+    const [ tabWidths,setTabWidths ] = useState<number[]>(screens.map(screen=>screen.width));
+    const [ tabPosX,setTabPosX ] = useState<number[]>(tabWidths)
 
-    useEffect(()=>{
-        let TabsWidth:number[] = [];
-        let TabsPosX: number[] = [];
+    const onItemLayout = (index:number) => (event:any) => {
+        const { width } = event.nativeEvent.layout;
 
-        // Measuring the width of screen name tab
-        TabsWidth = screens.map((screen)=>estimateTextWidth(screen.name.toUpperCase(),FONTSIZE.size_12)+30-2);
-
-        let posX = 10;
-
-        // Measuring the position to left from the start of flatlist of the screen name tab
-        TabsPosX = screens.map((screen)=>{
-            const temp =  posX;
-            posX = posX + estimateTextWidth(screen.name.toUpperCase(),FONTSIZE.size_12)+30-2 + 10;
-            return temp;
+        setTabWidths((prevWidths)=>{
+            const newWidths = [...prevWidths];
+            newWidths[index]  = width;
+            return newWidths;
         })
 
-        setScreenTitleWidths(TabsWidth);
-        setScreenTitlePosX(TabsPosX);
-    },[screens])
+        setTabPosX((prevPosX)=>{
+            const  newPosX = [...prevPosX];
+
+            if(index>=1){
+                newPosX[index] = newPosX[index-1] + tabWidths[index-1] + 6;
+            }
+            else {
+                newPosX[0] = 10;
+            }
+            return newPosX;
+        })
+    };
+
+    const indicatorOffset = useMemo(() => {
+        return scrollX.interpolate({
+            inputRange: screens.map((_, i) => i * width),
+            outputRange: screens.map((screen, currIndex) => {
+                // Within the range of 0 and width/2
+                if (tabPosX[currIndex] <= width / 2) return 0;
+        
+                if (currIndex === screens.length - 1) {
+                    if (tabPosX[currIndex] + tabWidths[currIndex] + 10 > width) {
+                        // offset for prev screen
+                        const prevOffset = width * (Math.floor((tabPosX[screens.length - 1] + tabWidths[screens.length - 1] + 10) / width) - 1);
+
+                        // new offset distance to be added
+                        const offset = ((tabPosX[screens.length - 1] + tabWidths[screens.length - 1] + 10) % width);
+                        
+                        return prevOffset + offset;
+                    } else return 0;
+                }
+
+                // if they are the last elements of the tab list where they are within the range of totalTabListLength-width/2 to totalTabListLength;
+                if ((tabPosX[screens.length - 1] + tabWidths[screens.length - 1] + 10) - tabPosX[currIndex] < width / 2) {
+                    return (tabPosX[currIndex] - width / 2 - 6);
+                }
+
+                // between width/2 and totalTabListLength-width/2
+                return (tabPosX[currIndex] - (width / 2));
+            }),
+            extrapolate: 'clamp'
+        });
+    }, [scrollX, screens, tabPosX, tabWidths, width]);
 
     const handleOnScroll = (event:any) => {
-        // getting the scrollX position of the second flatlist
         Animated.event(
             [
                 {
@@ -128,158 +170,108 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
                 useNativeDriver: false,
             },
         )(event);
-    };
 
-    useEffect(()=>{
-        // adding a listener to the scrollX  to get the corresonding offset for tablist
-        const listenerId = scrollX.addListener(({value})=>{
-            // its zero for index 0 and 1
-            let correspondingOffset = 0;
+        const value = event.nativeEvent.contentOffset.x;
 
-            if(value/width>1){
-                // getting the scrollDisplacement based on screen width 
-                const scrollDistance = value%width>0?value%width:width;
+        // its zero for index 0 
+        let correspondingOffset = 0;
+        
+        const scrollDistance = value%width>0?value%width:width;
 
-                // Ratio of screen scrolled
-                let scrolledRatio = scrollDistance/width;
+        // Ratio of screen scrolled to total width of screen
+        let scrolledRatio = scrollDistance/width;
 
-                // *2 to make it twice as fast as the indicator 
-                if(scrolledRatio<=.5){
-                    scrolledRatio*=2;
+        if(value/width>1){
+
+            // Distance of front of previous Tab from center of screen
+            const prevTabDisFromCenter = (tabPosX[Math.ceil(value/width)-1])-(width/2);
+
+            // Distance of back of previous Tab from center of screen
+            const prevTabBackDisFromCenter = (tabPosX[Math.ceil(value/width)-1]+tabWidths[Math.ceil(value/width)-1])-(width/2);
+
+            //if the prevTab position is somewhere in middle of screen
+            if(prevTabDisFromCenter<0 && prevTabBackDisFromCenter >0){
+                if(scrolledRatio>=.285 && scrolledRatio<=.570){
+                    correspondingOffset +=(prevTabBackDisFromCenter+6)*(scrolledRatio-.285)*3.5085
                 }
-                else {
-                    // as it will be 1 when its at .5
-                    scrolledRatio = 1;
-                }
-                
-                if(value/width>2){
-                    // to get prev tab distance from center
-                    correspondingOffset+=(screenTitlePosX[Math.ceil(value/width)-1]-(width/2));
-
-                    // to move the flatlist based on distance between prev and current tab
-                    correspondingOffset += (screenTitlePosX[Math.ceil(value/width)]-screenTitlePosX[Math.ceil(value/width)-1])*scrolledRatio;
-                }
-                else {
-                    // to make it to center
-                    correspondingOffset +=(screenTitlePosX[Math.ceil(value/width)]-(width/2))*scrolledRatio
+                else if( scrolledRatio>.570){
+                    correspondingOffset +=(prevTabBackDisFromCenter+6)
                 }
             }
+            else {
+                // previous tab offset
+                correspondingOffset+=(tabPosX[Math.ceil(value/width)-1]-(width/2));
 
-            tabsListRef.current?.scrollToOffset({
-                offset: correspondingOffset,
-                animated: true,
-            });
-            
-            //  to set it to 0 if we move the second flatlist
-            indicatorRef.current?.setNativeProps({
-                style:{
-                    marginLeft : 0
+                // to move the flatList based on distance between prev and current tab
+                if(scrolledRatio>=.285 && scrolledRatio<=.570){
+                    correspondingOffset += (tabPosX[Math.ceil(value/width)]-tabPosX[Math.ceil(value/width)-1])*(scrolledRatio-.285)*3.5085;
                 }
-            })
-        })
-
-        return () => {
-            scrollX.removeListener(listenerId);
-        };
-    },[scrollX,screenTitlePosX])
-
-    const handleOnScrollTabs = (event:any) => {
-        // getting x position of first flatlist
-        Animated.event(
-            [
-                {
-                    nativeEvent: {
-                    contentOffset: {
-                        x: scrollXTabs,
-                    },
-                    },
-                },
-            ],
-            {
-                useNativeDriver: false,
-            },
-        )(event);
-    };
-
-    useEffect(()=>{
-        const listenerId = scrollXTabs.addListener(({value})=>{
-            
-            // if we are not scrolling the first flatlist
-            if(currentActiveList!==1) return;
-
-            // for 0 and 1 the offset will be equal to scrolled value as it is as zero offset initially
-            let indicatorOffset = value;
-            
-            if(currentActiveIndex >1) {
-                // for last index the initial offset is padding* 2 + prev tab scrollPosX - width/2
-                if(currentActiveIndex===screenTitlePosX.length-1){
-                    if(screenTitlePosX[currentActiveIndex]+screenTitleWidths[currentActiveIndex]>width) 
-                        indicatorOffset-= ((screenTitlePosX[currentActiveIndex-1]-(width/2))+SPACING.space_10*2)
-                }
-                else {
-                    // for all others its initial offset is distance from center
-                    indicatorOffset-= (screenTitlePosX[currentActiveIndex]-(width/2));
+                else if( scrolledRatio>.570){
+                    correspondingOffset += (tabPosX[Math.ceil(value/width)]-tabPosX[Math.ceil(value/width)-1])
                 }
             }
-
-            indicatorRef.current?.setNativeProps({
-                style:{
-                    marginLeft : -indicatorOffset
-                }
-            })
-        })
-        return () => {
-            scrollXTabs.removeListener(listenerId);
-        };
-    },[scrollXTabs,currentActiveList])
-
-    const handleOnViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-        setCurrentActiveIndex(viewableItems[0]?.index??0);
-    }).current;
+        }
+        
+        // only move flatlist when we have scrolled more than or equal toss 28.5% of screen width
+        if(scrolledRatio>=.285) {
+            tabListRef.current?.scrollToOffset({offset:correspondingOffset,animated:true});
+        }
+    };
     
 
-    const scrollToIndex = React.useCallback((index: number) => {
+    const handleOnViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+        const index = viewableItems[0]?.index ??0;
+        if(index>maxIndexVisited) setMaxIndexVisited(index);
+    },[maxIndexVisited]);
+
+    const scrollToIndex = useCallback((index: number) => {
         screenListRef.current?.scrollToIndex({ animated: true, index });
     },[])
+
 
     return (
         <View style={{flex:1}}>
             <View>
-                <Animated.FlatList horizontal data={screens} 
-                    ref = {tabsListRef}
-                    keyExtractor={(item,index)=>String(index)}
-                    decelerationRate={0}
-                    bounces={false}
-                    showsHorizontalScrollIndicator={false}
-                    style={[styles.header]}
-                    contentContainerStyle = {{gap:SPACING.space_10,paddingHorizontal : SPACING.space_10}}
-                    onScroll={handleOnScrollTabs}
-                    scrollEventThrottle={16}
-                    onScrollBeginDrag={()=>setCurrentActiveList(1)}
-                    renderItem={({item,index})=>(
-                        <Tab item={item} index={index} currentActiveIndex={currentActiveIndex} setCurrentActiveIndex={setCurrentActiveIndex} scrollToIndex={scrollToIndex} setCurrentActiveList={setCurrentActiveList}/>
+                <FlatList ref={tabListRef}
+                horizontal 
+                data={screens}
+                keyExtractor={(item,index)=>String(index)} 
+                bounces={false}
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={16}
+                scrollEnabled={false}
+                style={[styles.header]}
+                contentContainerStyle={{gap:SPACING.space_6,paddingHorizontal : SPACING.space_10}}
+                renderItem={({item,index})=>(
+                    <View onLayout={onItemLayout(index)}>
+                        <Tab item={item} index={index} scrollToIndex={scrollToIndex} scrollX={scrollX}/>
+                    </View>
                 )}/>
             </View>
-            <Indicator screenTitleWidths={screenTitleWidths} screenTitlePosX ={screenTitlePosX} scrollX={scrollX} ref={indicatorRef}/>
+            {<Indicator scrollX={scrollX} screenTitlesWidth={tabWidths} screenTabPosX={tabPosX} ref={indicatorRef} scrollXTabs={indicatorOffset} />}
             <FlatList
                 ref={screenListRef}
                 horizontal 
-                data={screens} keyExtractor={(item,index)=>String(index)} 
+                data={screens}
+                keyExtractor={(item,index)=>String(index)} 
                 pagingEnabled
                 bounces={false}
                 showsHorizontalScrollIndicator={false}
                 onScroll={handleOnScroll}
                 scrollEventThrottle={16}
-                onTouchStart={()=>setCurrentActiveList(2)}
-                viewabilityConfig={{
-                    itemVisiblePercentThreshold: 50,
-                    minimumViewTime : 100
-                }}
+                // viewabilityConfig={{
+                //     itemVisiblePercentThreshold: 50,
+                //     minimumViewTime : 100
+                // }}
                 onViewableItemsChanged={handleOnViewableItemsChanged}
+                // onMomentumScrollEnd = {(event) => {
+                //     const newIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+                //     setCurrentActiveIndex(newIndex); 
+                // }}
                 style={{flex:1}}
-                renderItem={({item})=>(
-                    item.component(navigation)
-            )}/>
+                renderItem={({item,index})=>(
+                    <ScreenWrapper maxIndexVisited={maxIndexVisited} component={item.component} index={index} navigation={navigation}/>
+                )}/>
         </View>
     )
 }
@@ -288,19 +280,20 @@ export default ScreenSelectionCarousal
 
 const styles = StyleSheet.create({
     header : {
+        flex:0,
         borderBottomWidth : 1,
         borderBottomColor : COLORS.WhiteRGBA45,
-        backgroundColor:COLORS.Black
+        backgroundColor:COLORS.Black,
     },
     headerListText : {
         fontFamily : FONTFAMILY.lato_bold,
         fontSize : FONTSIZE.size_12,
         textTransform : "uppercase",
-        padding:SPACING.space_15
+        padding:SPACING.space_16
     },
     currentActiveBar: {
         position:"absolute",
-        top : SPACING.space_36*1.2,
+        top : SPACING.space_36*1.25,
         height: 2,
         backgroundColor: COLORS.OrangeRed,
         borderRadius : BORDERRADIUS.radius_4,

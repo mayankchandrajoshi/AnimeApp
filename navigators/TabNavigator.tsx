@@ -43,7 +43,7 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName="User"
+      initialRouteName="MyList"
       backBehavior="history"
       screenOptions={{
         tabBarHideOnKeyboard: true,

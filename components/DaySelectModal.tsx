@@ -6,15 +6,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const DaySelectComponent = ({ day,selectedDay,setSelectedDay,setShowModal } : { day:Days, selectedDay:Days,setSelectedDay: React.Dispatch<React.SetStateAction<Days>>,setShowModal: React.Dispatch<React.SetStateAction<boolean>>} ) =>{
 
-  const { backgroundColor,animateColorPressIn,animateColorPressOut} = useAnimatedPress("transparent", COLORS.WhiteRGBA15,200,400);
-
-  const closeModal = () =>{
-    setTimeout(()=>{setShowModal(false)},100);
-  }
+  const { backgroundColor,animateColorPressIn,animateColorPressOut} = useAnimatedPress("transparent", COLORS.WhiteRGBA15,100,200);
   
   return (
     <Animated.View style={[{backgroundColor,borderRadius : BORDERRADIUS.radius_10}]}>
-      <Pressable onPress={()=>{setSelectedDay(day),closeModal()}} 
+      <Pressable onPress={()=>{setSelectedDay(day),setShowModal(false)}} 
       onPressIn={animateColorPressIn} onPressOut={animateColorPressOut} 
       style={[styles.dayTextContainer,selectedDay===day?{backgroundColor:COLORS.WhiteRGBA30,borderRadius : BORDERRADIUS.radius_10}:{}]}
       >
@@ -29,18 +25,14 @@ const DaySelectComponent = ({ day,selectedDay,setSelectedDay,setShowModal } : { 
   
 const DaySelectModal = ({ showModal,setShowModal,selectedDay,setSelectedDay }:{showModal:boolean,setShowModal : React.Dispatch<React.SetStateAction<boolean>> ,selectedDay:Days,setSelectedDay: React.Dispatch<React.SetStateAction<Days>>}) =>{
 
-  const closeModal = () =>{
-    setTimeout(()=>{setShowModal(false)},100);
-  }
-
   return (
     <Modal 
     animationType="fade"
     transparent={true}
     visible={showModal}
-      onRequestClose={() => closeModal()}
+      onRequestClose={() => setShowModal(false)}
     >
-      <Pressable onPress={()=>closeModal()} style={styles.modalOverlay}>
+      <Pressable onPress={()=>setShowModal(false)} style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <MaterialIcons name="arrow-back" size={FONTSIZE.size_24} color={COLORS.WhiteRGBA75} />
@@ -73,7 +65,8 @@ const styles = StyleSheet.create({
   modalContent : {
     borderRadius : BORDERRADIUS.radius_15,
     width : "80%",
-    backgroundColor : COLORS.DullBlack
+    backgroundColor : COLORS.DullBlack,
+    elevation:5
   },
   modalHeader : {
     flexDirection : "row",

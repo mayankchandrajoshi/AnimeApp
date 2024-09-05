@@ -18,7 +18,7 @@ const GenreCard= ({item,navigation}:{item:{
         style={styles.backgroundImg}
       > 
         <Animated.View style={[{flex:1,backgroundColor}]}>
-          <Pressable onPress={()=>navigation.push("GenreAnime",{id:item.id,name:item.name})} onPressIn={animateColorPressIn} onPressOut={animateColorPressOut} style={[styles.genreContainer]}>
+          <Pressable onPress={()=>navigation.navigate("GenreAnime",{id:item.id,name:item.name})} onPressIn={animateColorPressIn} onPressOut={animateColorPressOut} style={[styles.genreContainer]}>
             {item.icon}
             <Text style={styles.genre}>{item.name}</Text>
           </Pressable>

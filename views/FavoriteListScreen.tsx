@@ -5,11 +5,13 @@ import { COLORS, SPACING } from '../themes/themes';
 import AnimeCardSkeleton from '../components/AnimeCardSkeleton';
 import NoAnimeScreen from '../components/NoAnimeScreen';
 import AnimeCard from '../components/AnimeCard';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigationTypes';
 
 
 const { width } = Dimensions.get("screen");
 
-const FavoriteListScreen = ({ navigation }:any) => {
+const FavoriteListScreen = ({navigation}:any) => {
   
   const [ isLoadingData,setLoadingData ] = useState(true);
 
@@ -21,9 +23,6 @@ const FavoriteListScreen = ({ navigation }:any) => {
     },500)
   },[])
 
-  const viewAnime = (id:number)=>{
-    navigation.push('AnimeDetails', {id});
-  }
 
   if(isLoadingData){
     return (
@@ -45,7 +44,8 @@ const FavoriteListScreen = ({ navigation }:any) => {
             keyExtractor={(item,index) => String(index)}
             style={[styles.cardsWrapper]} 
             columnWrapperStyle = {styles.cardsWrapperRow}
-            renderItem={({item,index})=><View style={styles.cardWrapper}><AnimeCard id={item.id} name ={item.name} image_url ={item.image_url} type ={item.type} width={(width/2)-(SPACING.space_15+SPACING.space_10/2)} index={index%2} isBoundaryCard={true} viewAnime={(id:number)=>{viewAnime(id)}} /></View>}
+            renderItem={({item,index})=><View style={styles.cardWrapper}><AnimeCard id={item.id} name ={item.name} image_url ={item.image_url} type ={item.type} width={(width/2)-(SPACING.space_15+SPACING.space_10/2)} index={index%2} isBoundaryCard={true} 
+            viewAnime={(id:number)=>{navigation.push('AnimeDetails', {id})}} /></View>}
             />
         )
       }

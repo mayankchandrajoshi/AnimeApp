@@ -13,6 +13,14 @@ import { StatusBar } from 'react-native';
 import EpisodesDetailsScreen from './views/EpisodesDetailsScreen';
 import LogoutScreen from './views/LogoutScreen';
 import GenresAnimeScreen from './views/GenreAnimeScreen';
+import AuthenticationScreen from './views/AuthenticationScreen';
+import LoginScreen from './views/LoginScreen';
+import AccountRegisterScreen from './views/AccountRegisterScreen';
+import { COLORS } from './themes/themes';
+import AppLoadingScreen from './views/AppLoadingScreen';
+import * as SystemUI from 'expo-system-ui';
+import * as NavigationBar from 'expo-navigation-bar';
+import { PaperProvider } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,19 +39,55 @@ const fetchFonts = () => {
   });
 };
 
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
-    fetchFonts().then(() => {
-      setFontsLoaded(true);
-      SplashScreen.hideAsync();
-    });
+    async function prepare() {
+      try {
+        await NavigationBar.setBackgroundColorAsync(COLORS.Black); 
+        await fetchFonts();
+        await new Promise(resolve => setTimeout(resolve, 2000)); // To add delay
+        setFontsLoaded(true); 
+      } catch (e) {
+        console.error(e);
+      } finally {
+        await SplashScreen.hideAsync();
+      }
+    }
+    prepare();
   }, []);
 
   if (!fontsLoaded) {
-    return null;
+    return <AppLoadingScreen/>
   }
+  
+  return (
+    <PaperProvider>
+      <NavigationContainer>
+        <StatusBar translucent backgroundColor={'transparent'} />
+        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName='Auth' >
+          <Stack.Screen
+            name="Auth"
+            component={AuthenticationScreen}
+          />
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen}
+            options={{ presentation:"transparentModal"}}
+          />
+          <Stack.Screen 
+            name="Register" 
+            component={AccountRegisterScreen}
+            options={{ presentation:"transparentModal"}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
+  )
+  
   return (
     <NavigationContainer>
       <StatusBar translucent backgroundColor={'transparent'} />

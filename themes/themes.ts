@@ -6,6 +6,7 @@ interface Spacing {
     space_8: number;
     space_10: number;
     space_12: number;
+    space_14: number;
     space_15: number;
     space_16: number;
     space_18: number;
@@ -30,6 +31,7 @@ export const SPACING: Spacing = {
     space_8: 8,
     space_10: 10,
     space_12: 12,
+    space_14: 14,
     space_15: 15,
     space_16: 16,
     space_18: 18,
@@ -71,7 +73,8 @@ interface Color {
     DarkGrey: string;
     DarkGrey80 : string,
     DimGrey : string,
-    Yellow: string;
+    MustardYellow: string;
+    MustardYellow80: string;
     White: string;
     WhiteRGBA90: string;
     WhiteRGBA75: string;
@@ -80,6 +83,7 @@ interface Color {
     WhiteRGBA30: string;
     WhiteRGBA20: string;
     WhiteRGBA15: string;
+    WhiteRGBA10: string;
   }
   
 export const COLORS: Color = {
@@ -106,7 +110,8 @@ export const COLORS: Color = {
     DarkGrey: '#A9A9A9',
     DarkGrey80 : "rgba(169,169,169,.8)",
     DimGrey : "#696969",
-    Yellow: '#FFFF00',
+    MustardYellow: 'rgba(225, 165, 1,1)',
+    MustardYellow80: 'rgba(225, 165, 1,.80)',
     White: '#FFFFFF',
     WhiteRGBA90: 'rgba(255,255,255,0.90)',
     WhiteRGBA75: 'rgba(255,255,255,0.75)',
@@ -115,6 +120,7 @@ export const COLORS: Color = {
     WhiteRGBA30: 'rgba(255,255,255,0.30)',
     WhiteRGBA20: 'rgba(255,255,255,0.20)',
     WhiteRGBA15: 'rgba(255,255,255,0.15)',
+    WhiteRGBA10: 'rgba(255,255,255,0.10)',
   };
   
 interface FontFamily {

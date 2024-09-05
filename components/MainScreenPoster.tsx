@@ -73,7 +73,7 @@ export default MainScreenPoster
 
 const styles = StyleSheet.create({
   container : {
-
+    
   },
   imageWrapper : {
   
@@ -84,6 +84,8 @@ const styles = StyleSheet.create({
   },
   contentContainer : {
     position:"absolute",
+    left:0,
+    right:0,
     bottom:0,
     paddingHorizontal : SPACING.space_15,
     paddingVertical : SPACING.space_4,

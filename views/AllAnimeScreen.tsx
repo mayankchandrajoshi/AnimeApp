@@ -46,8 +46,8 @@ const AllAnimeScreen = ({navigation}:any) => {
 
     const { isSWFEnabled } = swfFilterStore();
 
-    const sortAnimatedPress = useAnimatedPress("transparent", COLORS.WhiteRGBA15, 200, 400);
-    const filterAnimatedPress = useAnimatedPress("transparent", COLORS.WhiteRGBA15, 200, 400);
+    const sortAnimatedPress = useAnimatedPress("transparent", COLORS.WhiteRGBA15, 100, 400);
+    const filterAnimatedPress = useAnimatedPress("transparent", COLORS.WhiteRGBA15, 100, 400);
 
     const translateXFilterModal = useRef(new Animated.Value(width)).current;
 
@@ -131,18 +131,20 @@ const AllAnimeScreen = ({navigation}:any) => {
             <View style = {styles.headingContainer}>
                 <Text style={styles.mainHeading}>{sortFilter[sortBy].name}</Text>
                 <View style={styles.filterIconContainer}>
-                    <Animated.View style={[styles.filterIconButton,{ backgroundColor : sortAnimatedPress.backgroundColor }]}>
+                    <Animated.View style={[{ backgroundColor : sortAnimatedPress.backgroundColor }]}>
                         <Pressable onPress={openSortModal}
                             onPressIn={ sortAnimatedPress.animateColorPressIn }
                             onPressOut={ sortAnimatedPress.animateColorPressOut }
+                            style={[styles.filterIconButton,]}
                         >
                             <MaterialCommunityIcons name="sort-variant" size={FONTSIZE.size_20} color={COLORS.White} />
                         </Pressable>
                     </Animated.View>
-                    <Animated.View style={[styles.filterIconButton,{ backgroundColor : filterAnimatedPress.backgroundColor }]}>
+                    <Animated.View style={[{ backgroundColor : filterAnimatedPress.backgroundColor }]}>
                         <Pressable onPress={openFiltersModal}
                             onPressIn={ filterAnimatedPress.animateColorPressIn }
                             onPressOut={ filterAnimatedPress.animateColorPressOut }
+                            style={[styles.filterIconButton,]}
                         >
                             <AntDesign name="filter" size={FONTSIZE.size_20} color={COLORS.White} />
                         </Pressable>

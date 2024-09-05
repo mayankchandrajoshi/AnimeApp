@@ -19,6 +19,7 @@ import ScreenSelectionCarousal from '../components/ScreenSelectionCarousal';
 import AnimeEpisodesList from '../components/AnimeEpisodesList';
 import RecommendedAnimeList from '../components/RecommendedAnimeList';
 import * as NavigationBar from 'expo-navigation-bar';
+import estimateTextWidth from '../utils/estimateTextWidth';
 
 const { width:windowWidth,height:windowHeight } = Dimensions.get("window");
 const { width:screenWidth,height:screenHeight } = Dimensions.get("screen");
@@ -109,15 +110,18 @@ const AnimeDetailsScreen = ({navigation}:any) => {
   const Screens = [
     {
       name: "Episodes",
-      component: (navigation: any) => <AnimeEpisodesList navigation={navigation} id={id} />
+      component: (navigation: any) => <AnimeEpisodesList navigation={navigation} id={id} />,
+      width : estimateTextWidth("Episodes".toUpperCase(),FONTSIZE.size_12)+30-2
     },
     {
       name: "Characters",
-      component: (navigation: any) => <AnimeCharactersList navigation={navigation} id={id} />
+      component: (navigation: any) => <AnimeCharactersList navigation={navigation} id={id} />,
+      width : estimateTextWidth("Characters".toUpperCase(),FONTSIZE.size_12)+30-2
     },
     {
       name : "Recommended",
-      component: (navigation: any) => <RecommendedAnimeList navigation={navigation} id={id} />
+      component: (navigation: any) => <RecommendedAnimeList navigation={navigation} id={id} />,
+      width : estimateTextWidth("Recommended".toUpperCase(),FONTSIZE.size_12)+30-2
     }
   ];
 
@@ -393,7 +397,9 @@ const AnimeDetailsScreen = ({navigation}:any) => {
             </Modal>
           </View>
         </View>
-        <ScreenSelectionCarousal screens={Screens} navigation={navigation} />
+        <View style={{backgroundColor:COLORS.Black}}>
+          <ScreenSelectionCarousal screens={Screens} navigation={navigation} />
+        </View>
       </ScrollView>
     </View>
   );
