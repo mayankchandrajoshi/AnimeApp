@@ -1,24 +1,26 @@
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useEffect } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import { FontAwesome5, Ionicons, SimpleLineIcons } from '@expo/vector-icons'
 import statusBarHeight from '../utils/getStatusBarHeight'
+import userStore from '../store/userStore'
 
 const { width,height } = Dimensions.get("screen")
 
 const UserScreen = ({navigation}:any) => {
+  const { userData:{user} }  = userStore();
   return (
-    <View style={styles.container}>
+    <ScrollView bounces={false} style={styles.container}>
       <View style={{padding:SPACING.space_6}}>
         <Text style={[styles.textWhite24Bold,{textAlign:"center",color:COLORS.OrangeRed}]}>Profile</Text>
-        <TouchableOpacity activeOpacity={.8} onPress={()=>{}}  style={styles.editBtn}>
+        <TouchableOpacity activeOpacity={.8} onPress={()=>{navigation.navigate("UpdateUser")}}  style={styles.editBtn}>
           <FontAwesome5 name="pen" size={FONTSIZE.size_24} color={COLORS.Black} />
         </TouchableOpacity>
       </View>
       <View style={{ paddingVertical:SPACING.space_28,justifyContent:"center",alignItems:"center",gap:SPACING.space_16 }}>
-        <Image source={require("../assets/images/placeholders/profile_pic.jpg")} style={styles.profileImg}/>
-        <Text style={[styles.textWhite24Bold,{textAlign:"center"}]}>Mayank Chandra Joshi</Text>
-        <Text style={[styles.textWhite16Regular,{padding:SPACING.space_10,textAlign:"center",backgroundColor:COLORS.WhiteRGBA15,borderRadius:BORDERRADIUS.radius_20,marginTop:SPACING.space_4}]} numberOfLines={1}>mayankchandrajoshi9871@gmail.com</Text>
+        <Image source={{uri:user?.avatar.url}} style={styles.profileImg}/>
+        <Text style={[styles.textWhite24Bold,{textAlign:"center"}]}>{user?.name}</Text>
+        <Text style={[styles.textWhite16Regular,{padding:SPACING.space_10,textAlign:"center",backgroundColor:COLORS.WhiteRGBA15,borderRadius:BORDERRADIUS.radius_20,marginTop:SPACING.space_4}]} numberOfLines={1}>{user?.email}</Text>
       </View>
       <View style={{ paddingVertical:SPACING.space_28,gap:SPACING.space_16 }}>
         <TouchableOpacity activeOpacity={.8} style={styles.btn}>
@@ -34,7 +36,7 @@ const UserScreen = ({navigation}:any) => {
           <Text style={[styles.textWhite20Bold,{color:COLORS.Black}]}>Log out</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   )
 }
 

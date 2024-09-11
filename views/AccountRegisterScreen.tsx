@@ -1,4 +1,4 @@
-import { Alert, Animated, Button, Dimensions, Image, Linking, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Animated, Button, Dimensions, Image, Linking, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -6,17 +6,27 @@ import statusBarHeight from '../utils/getStatusBarHeight'
 import { TextInput, Tooltip } from 'react-native-paper'
 import useAnimatedPress from '../utils/animatedPress'
 import * as ImagePicker from 'expo-image-picker';
+import userStore from '../store/userStore'
+import axios from 'axios'
+import { userInterface } from '../interface/commonInterface'
+import convertToBase64 from '../utils/convertImageBase64'
+import { ALERT_TYPE } from 'react-native-alert-notification'
+import { Toast } from 'react-native-alert-notification'
 
 const { width,height } = Dimensions.get("screen")
 
 const AccountRegisterScreen = ({navigation}:any) => {
 
   const [ image,setImage ] = useState<null|string>(null);
+  const [ name,setName ]  = useState("");
   const [ email,setEmail ]  = useState("");
   const [ password,setPassword ]  = useState("");
   const [ showPassword,setShowPassword ] = useState(false);
   const [ confirmPassword,setConfirmPassword ]  = useState("");
   const [ showConfirmPassword,setShowConfirmPassword ]  = useState(false);
+  const [ isSignUpInProcess,setIsSignUpInProcess ] = useState(false);
+
+  const { login } = userStore();
   
   const createAccountBtnAnimatedPress = useAnimatedPress("transparent", COLORS.WhiteRGBA30, 200, 400);
 
@@ -47,29 +57,99 @@ const AccountRegisterScreen = ({navigation}:any) => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri); 
+    if (!result.canceled) { 
+      const imageBase64 = await convertToBase64(result.assets[0].uri);
+
+      if(!imageBase64){
+        return Toast.show({
+          type: ALERT_TYPE.DANGER,
+          textBody: 'Error converting image to base64',
+        })
+      }
+
+      setImage(imageBase64);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
+    setIsSignUpInProcess(true);
+    if(!image){
+      setIsSignUpInProcess(false);
+      return Toast.show({
+        type: ALERT_TYPE.WARNING,
+        textBody: "Please select an image",
+      })
+    }
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      return alert("Please enter a valid email address.");
+      setIsSignUpInProcess(false);
+      return Toast.show({
+        type: ALERT_TYPE.WARNING,
+        textBody: "Please enter a valid email address.",
+      })
     } 
-    if (password.length<8) {
-      return alert("Password cannot be less than 8 character");
+    if (password.length<=8) {
+      setIsSignUpInProcess(false);
+      return Toast.show({
+        type: ALERT_TYPE.WARNING,
+        textBody: "Password cannot be less than 9 character",
+      })
     } 
     if (confirmPassword!=password) {
-      return alert("Password and confirm password doesn't match");
+      setIsSignUpInProcess(false);
+      return Toast.show({
+        type: ALERT_TYPE.WARNING,
+        textBody: "Password and confirm password doesn't match",
+      })
     } 
+
+    try {
+      const config = { headers: { "Content-Type": "multipart/form-data" } ,withCredentials: true };
+      
+      const myForm = new FormData();
+      myForm.append("name", name);
+      myForm.append("email", email);
+      myForm.append("password", password);
+
+      myForm.append("avatar", image);
+
+      await axios.post('https://anime-backend-delta.vercel.app/api/v1/register',myForm,config);
+
+      const loginConfig = { headers: { "Content-Type": "application/json" },withCredentials: true };
+      
+      await axios.post('https://anime-backend-delta.vercel.app/api/v1/login',{
+        email,password
+      },loginConfig)
+
+      const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',config);
+
+      login(user);
+
+    } catch (error:any) {
+      if(error.response.data.message) {
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          textBody: error.response.data.message,
+        })
+      }
+      else {
+        console.log(error);
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          textBody: "An error occurred.",
+        })
+      }
+    }
+    finally{
+      setIsSignUpInProcess(false);
+    }
   };
   
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-          <Pressable onPress={()=>{navigation.goBack()}} style={{position:"absolute",left:SPACING.space_8,top:0}}>
-            <AntDesign name="close" size={FONTSIZE.size_30} color={COLORS.White} style={{padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_25}}/>
+          <Pressable onPress={()=>{navigation.goBack()}} style={{position:"absolute",left:SPACING.space_8,top:0,zIndex:10,padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_25}}>
+            <AntDesign name="close" size={FONTSIZE.size_30} color={COLORS.White}/>
           </Pressable>
         <View style={{flex:1}}>
           <Text style={[styles.textWhite22Bold,{textAlign:"center"}]} numberOfLines={1}>
@@ -99,6 +179,25 @@ const AccountRegisterScreen = ({navigation}:any) => {
               <MaterialCommunityIcons name="camera-plus" size={FONTSIZE.size_30} color={COLORS.OrangeRed} style={{position:"absolute",right:0,bottom:0}}/>
             </TouchableOpacity>
           </View>
+          <TextInput
+            label="Name"
+            value={name}
+            onChangeText={text => setName(text)}
+            cursorColor = {COLORS.OrangeRed}
+            selectionColor = {COLORS.OrangeRed}
+            outlineColor = {COLORS.OrangeRed}
+            underlineColor = {COLORS.White}
+            activeUnderlineColor = {COLORS.OrangeRed}
+            textColor = {COLORS.White}
+            activeOutlineColor = {COLORS.OrangeRed}
+            selectionHandleColor = {COLORS.OrangeRed}
+            theme={{
+              colors: {
+                onSurfaceVariant : COLORS.WhiteRGBA60,
+                surfaceVariant : COLORS.WhiteRGBA10,
+              },
+            }}
+          />
           <TextInput
             label="Email"
             value={email}
@@ -176,31 +275,37 @@ const AccountRegisterScreen = ({navigation}:any) => {
         </View>
         <Animated.View 
           style={[styles.loginBtn,
-              (image&&email&&password&&confirmPassword)?{backgroundColor:COLORS.OrangeRed}:{backgroundColor:COLORS.Black}
+              (image&&name&&email&&password&&confirmPassword&&!isSignUpInProcess)?{backgroundColor:COLORS.OrangeRed}:{backgroundColor:COLORS.Black}
           ]}
         >
           <Animated.View 
               style={[
-                  (image&&email&&password&&confirmPassword)?{}:{borderWidth:SPACING.space_2,borderColor:COLORS.DimGrey},
-                  (image&&email&&password&&confirmPassword)?{backgroundColor:createAccountBtnAnimatedPress.backgroundColor}:{}
+                  (image&&name&&email&&password&&confirmPassword&&!isSignUpInProcess)?{}:{borderWidth:SPACING.space_2,borderColor:COLORS.DimGrey},
+                  (image&&name&&email&&password&&confirmPassword&&!isSignUpInProcess)?{backgroundColor:createAccountBtnAnimatedPress.backgroundColor}:{}
               ]}
           >
-            <Pressable disabled={!(image&&email&&password&&confirmPassword)} onPress={handleSubmit}
-                style={[(image&&email&&password&&confirmPassword)?{padding:SPACING.space_12}:{padding:SPACING.space_10}]}
+            <Pressable disabled={(!(image&&name&&email&&password&&confirmPassword)||isSignUpInProcess)} onPress={handleSubmit}
+                style={[(image&&name&&email&&password&&confirmPassword&&!isSignUpInProcess)?{padding:SPACING.space_12}:{padding:SPACING.space_10}]}
                 onPressIn={createAccountBtnAnimatedPress.animateColorPressIn}
                 onPressOut={createAccountBtnAnimatedPress.animateColorPressOut}
             >
-                <Text 
-                    style={[
-                        styles.loginBtnText,(image&&email&&password&&confirmPassword)?{color:COLORS.Black}:{color:COLORS.DimGrey}
-                    ]}
-                >CREATE ACCOUNT</Text>
+              {
+                !isSignUpInProcess?(
+                  <Text 
+                  style={[
+                      styles.loginBtnText,(image&&name&&email&&password&&confirmPassword&&!isSignUpInProcess)?{color:COLORS.Black}:{color:COLORS.DimGrey}
+                  ]}
+                  >CREATE ACCOUNT</Text>
+                ):(
+                  <ActivityIndicator size={FONTSIZE.size_18} color={COLORS.DimGrey} />
+                )
+              }
             </Pressable>
           </Animated.View>
         </Animated.View>
         <View style={{flexDirection:"row",justifyContent:"center",alignItems:"center"}}>
           <Text style={[styles.textWhite16Bold]}>Already have an account?</Text>
-          <TouchableOpacity activeOpacity={.8} onPress={()=>{navigation.navigate("Login")}} style={{padding:SPACING.space_4}}>
+          <TouchableOpacity disabled={isSignUpInProcess} activeOpacity={.8} onPress={()=>{navigation.navigate("Login")}} style={{padding:SPACING.space_4}}>
             <Text style={[styles.textWhite16Bold,{color:COLORS.OrangeRed}]}>Log In</Text>
           </TouchableOpacity>
         </View>

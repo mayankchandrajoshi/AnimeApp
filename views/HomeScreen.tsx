@@ -224,7 +224,7 @@ const HomeScreen = ({navigation}:any) => {
               <Text style={styles.footerText}>
                 Your have reached the end of the feed
               </Text>
-              <TouchableOpacity activeOpacity={0.8} style={styles.footerBtn} onPress={()=>navigation.navigate('BrowseStack')}>
+              <TouchableOpacity activeOpacity={0.8} style={styles.footerBtn} onPress={()=>navigation.navigate('Browse')}>
                 <Text style={styles.footerBtnText}>View All</Text>
               </TouchableOpacity>
             </View>)

@@ -3,8 +3,10 @@
     "name": "AnimeApp",
     "slug": "AnimeApp",
     "version": "1.0.0",
+    "scheme": "AnimeApp", 
+    "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/splash.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",

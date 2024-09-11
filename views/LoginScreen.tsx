@@ -3,28 +3,72 @@ import React, { useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import statusBarHeight from '../utils/getStatusBarHeight'
 import { AntDesign } from '@expo/vector-icons'
-import { TextInput } from 'react-native-paper'
+import { ActivityIndicator, TextInput } from 'react-native-paper'
 import useAnimatedPress from '../utils/animatedPress'
+import userStore from '../store/userStore'
+import axios from 'axios'
+import { userInterface } from '../interface/commonInterface'
+import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
 
 const LoginScreen = ({navigation}:any) => {
   const [ email,setEmail ]  = useState("");
   const [ password,setPassword ]  = useState("");
   const [ showPassword,setShowPassword ] = useState(false);
+  const [ isLoginInProcess,setIsLoginInProcess ] = useState(false);
+
+  const { login } = userStore();
 
   const loginBtnAnimatedPress = useAnimatedPress("transparent", COLORS.WhiteRGBA30, 200, 400);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setIsLoginInProcess(true);
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      return alert("Please enter a valid email address.");
+      setIsLoginInProcess(false);
+      return Toast.show({
+        type: ALERT_TYPE.WARNING,
+        textBody: 'Please enter a valid email address.',
+      })
     } 
+
+    try {
+      const config = { headers: { "Content-Type": "application/json" },withCredentials: true };
+      
+      await axios.post('https://anime-backend-delta.vercel.app/api/v1/login',{
+        email,password
+      },config)
+
+      const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',{
+        ...config,
+      });
+
+      login(user);
+
+    } catch (error:any) {
+      if(error.response.data.message) {
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          textBody: error.response.data.message,
+        })
+      }
+      else {
+        console.log(error);
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          textBody: "An error occurred.",
+        })
+      }
+    }
+    finally{
+      setIsLoginInProcess(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-          <Pressable onPress={()=>{navigation.goBack()}} style={{position:"absolute",left:SPACING.space_8,top:0}}>
-            <AntDesign name="close" size={FONTSIZE.size_30} color={COLORS.White} style={{padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_25}}/>
+          <Pressable onPress={()=>{navigation.goBack()}} style={{position:"absolute",left:SPACING.space_8,top:0,zIndex:10,padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_25}}>
+            <AntDesign name="close" size={FONTSIZE.size_30} color={COLORS.White}/>
           </Pressable>
         <View style={{flex:1}}>
           <Text style={[styles.textWhite22Bold,{textAlign:"center"}]} numberOfLines={1}>
@@ -95,25 +139,27 @@ const LoginScreen = ({navigation}:any) => {
         </View>
         <Animated.View 
           style={[styles.loginBtn,
-              (email&&password)?{backgroundColor:COLORS.OrangeRed}:{backgroundColor:COLORS.Black}
+              ((email&&password)&&!isLoginInProcess)?{backgroundColor:COLORS.OrangeRed}:{backgroundColor:COLORS.Black}
           ]}
         >
           <Animated.View 
               style={[
-                  (email&&password)?{}:{borderWidth:SPACING.space_2,borderColor:COLORS.DimGrey},
-                  (email&&password)?{backgroundColor:loginBtnAnimatedPress.backgroundColor}:{}
+                  ((email&&password)&&!isLoginInProcess)?{}:{borderWidth:SPACING.space_2,borderColor:COLORS.DimGrey},
+                  ((email&&password)&&!isLoginInProcess)?{backgroundColor:loginBtnAnimatedPress.backgroundColor}:{}
               ]}
           >
-            <Pressable disabled={!(email&&password)} onPress={handleSubmit}
-                style={[(email&&password)?{padding:SPACING.space_12}:{padding:SPACING.space_10}]}
+            <Pressable disabled={(!(email&&password)||isLoginInProcess)} onPress={handleSubmit}
+                style={[((email&&password)&&!isLoginInProcess)?{padding:SPACING.space_12}:{padding:SPACING.space_10}]}
                 onPressIn={loginBtnAnimatedPress.animateColorPressIn}
                 onPressOut={loginBtnAnimatedPress.animateColorPressOut}
             >
-                <Text 
+                {!isLoginInProcess?<Text 
                     style={[
-                        styles.loginBtnText,(email&&password)?{color:COLORS.Black}:{color:COLORS.DimGrey}
+                        styles.loginBtnText,((email&&password)&&!isLoginInProcess)?{color:COLORS.Black}:{color:COLORS.DimGrey}
                     ]}
-                >LOG IN</Text>
+                >LOG IN</Text>:(
+                  <ActivityIndicator size={FONTSIZE.size_18} color={COLORS.DimGrey} />
+                )}
             </Pressable>
           </Animated.View>
         </Animated.View>

@@ -21,6 +21,9 @@ import AppLoadingScreen from './views/AppLoadingScreen';
 import * as SystemUI from 'expo-system-ui';
 import * as NavigationBar from 'expo-navigation-bar';
 import { PaperProvider } from 'react-native-paper';
+import userStore from './store/userStore';
+import UpdateUserScreen from './views/UpdateUserScreen';
+import { AlertNotificationRoot } from 'react-native-alert-notification';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +46,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const { userData } = userStore();
 
   useEffect(() => {
     async function prepare() {
@@ -65,79 +69,85 @@ export default function App() {
   }
   
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        <StatusBar translucent backgroundColor={'transparent'} />
-        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName='Auth' >
-          <Stack.Screen
-            name="Auth"
-            component={AuthenticationScreen}
-          />
-          <Stack.Screen 
-            name="Login" 
-            component={LoginScreen}
-            options={{ presentation:"transparentModal"}}
-          />
-          <Stack.Screen 
-            name="Register" 
-            component={AccountRegisterScreen}
-            options={{ presentation:"transparentModal"}}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
-  )
-  
-  return (
+    <AlertNotificationRoot>
     <NavigationContainer>
       <StatusBar translucent backgroundColor={'transparent'} />
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen
-          name="Tab"
-          component={TabNavigator}
-          options={{animation: 'default'}}
-        />
-        <Stack.Screen
-          name="AnimeDetails"
-          component={AnimeDetailsScreen}
-          options={{animation: 'slide_from_right'}}
-        />
-        <Stack.Screen
-          name="EpisodesDetails"
-          component={EpisodesDetailsScreen}
-          options={{animation: 'slide_from_left'}}
-        />
-        <Stack.Screen
-          name="CharacterDetails"
-          component={CharacterDetailsScreen}
-          options={{animation: 'slide_from_right'}}
-        />
-        <Stack.Screen
-          name="VoiceActorDetails"
-          component={VoiceActorDetailsScreen}
-          options={{animation: 'slide_from_right'}}
-        />
-        <Stack.Screen
-          name="GenreAnime"
-          component={GenresAnimeScreen}
-          options={{animation: 'slide_from_right'}}
-        />
-        <Stack.Screen
-          name="Search"
-          component={SearchScreen}
-          options={{animation: 'slide_from_right'}}
-        />
-        <Stack.Group screenOptions={{ presentation: 'transparentModal' ,animation : 'fade',animationDuration:500}}>
-          <Stack.Screen 
-            name="SWFModal" 
-            component={SWFFilterScreen}
-          />
-          <Stack.Screen
-            name="Logout"
-            component={LogoutScreen}
-          />
-        </Stack.Group>
+        {
+          !userData.isAuthenticated?(
+            <Stack.Group>
+              <Stack.Screen
+                name="Auth"
+                component={AuthenticationScreen}
+              />
+              <Stack.Screen 
+                name="Login" 
+                component={LoginScreen}
+                options={{ presentation:"transparentModal"}}
+              />
+              <Stack.Screen 
+                name="Register" 
+                component={AccountRegisterScreen}
+                options={{ presentation:"transparentModal"}}
+              />
+            </Stack.Group>
+          ):(
+            <Stack.Group>
+              <Stack.Screen
+                name="Tab"
+                component={TabNavigator}
+                options={{animation: 'default'}}
+              />
+              <Stack.Screen
+                name="AnimeDetails"
+                component={AnimeDetailsScreen}
+                options={{animation: 'slide_from_right'}}
+              />
+              <Stack.Screen
+                name="EpisodesDetails"
+                component={EpisodesDetailsScreen}
+                options={{animation: 'slide_from_left'}}
+              />
+              <Stack.Screen
+                name="CharacterDetails"
+                component={CharacterDetailsScreen}
+                options={{animation: 'slide_from_right'}}
+              />
+              <Stack.Screen
+                name="VoiceActorDetails"
+                component={VoiceActorDetailsScreen}
+                options={{animation: 'slide_from_right'}}
+              />
+              <Stack.Screen
+                name="GenreAnime"
+                component={GenresAnimeScreen}
+                options={{animation: 'slide_from_right'}}
+              />
+              <Stack.Screen
+                name="Search"
+                component={SearchScreen}
+                options={{animation: 'slide_from_right'}}
+              />
+              <Stack.Screen
+                name="UpdateUser"
+                component={UpdateUserScreen}
+                options={{animation: 'slide_from_right'}}
+              />
+              <Stack.Group screenOptions={{ presentation: 'transparentModal' ,animation : 'fade',animationDuration:500}}>
+                <Stack.Screen 
+                  name="SWFModal" 
+                  component={SWFFilterScreen}
+                />
+                <Stack.Screen
+                  name="Logout"
+                  component={LogoutScreen}
+                />
+              </Stack.Group>
+            </Stack.Group>
+          )
+        }
       </Stack.Navigator>
     </NavigationContainer>
+    </AlertNotificationRoot>
   );
 }
