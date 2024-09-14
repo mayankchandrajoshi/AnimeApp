@@ -101,23 +101,19 @@ const AnimeCard:React.FC<AnimeCardProps> = ({id,name,image_url,type,width,index,
     const menuRef = useRef<View>(null);
 
     const handlePressIn = () => {
-        Animated.parallel([
-            Animated.timing(cardOpacity, {
-                toValue: 0.8,
-                duration: 300,
-                useNativeDriver: true,
-            }),
-        ]).start();
+        Animated.timing(cardOpacity, {
+            toValue: 0.8,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
     };
 
     const handlePressOut = () => {
-        Animated.parallel([
-            Animated.timing(cardOpacity, {
-                toValue: 1,
-                duration: 200,
-                useNativeDriver: true,
-            }),
-        ]).start();
+        Animated.timing(cardOpacity, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+        }).start();
     };
 
     const handleViewMenu = () => {

@@ -9,11 +9,11 @@ import { searchAnime } from '../api/apicalls';
 import axios from 'axios';
 import swfFilterStore from '../store/swfFilterStore';
 import AnimeCardGrid from '../components/AnimeCardGrid';
-import NoAnimeScreen from '../components/NoAnimeScreen';
 import FilterModal from '../components/FilterModal';
 import SortModal from '../components/SortModal';
 import { animeRatingFilter, animeTypeFilter, sortFilter } from '../constants/filters';
 import statusBarHeight from '../utils/getStatusBarHeight';
+import * as NavigationBar from 'expo-navigation-bar';
 
 const { width } = Dimensions.get("screen")
 
@@ -101,6 +101,10 @@ const SearchScreen = ({navigation}:any) => {
       useNativeDriver: true,
     }).start(() => setShowSortModal(false));
   };
+
+  useEffect(()=>{
+    NavigationBar.setBackgroundColorAsync(COLORS.Black);
+  })
 
   useEffect(()=>{
     const queryHandler = setTimeout(() => {

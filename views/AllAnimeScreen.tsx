@@ -1,15 +1,12 @@
-import { StyleSheet, Text, View, FlatList, ScrollView, Pressable, Animated, Modal, Dimensions } from 'react-native'
+import { StyleSheet, Text, View, Pressable, Animated, Dimensions } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { AnimeOrderFilter, AnimeRating, AnimeType } from '../enums/enums';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes';
 import useAnimatedPress from '../utils/animatedPress';
 import swfFilterStore from '../store/swfFilterStore';
-import Slider from '@react-native-community/slider';
 import axios from 'axios';
 import { searchAnime } from '../api/apicalls';
 import AnimeCardGrid from '../components/AnimeCardGrid';
-import { is1DArrayEqual } from '../utils/compareArray';
 import FilterModal from '../components/FilterModal';
 import { animeRatingFilter, animeTypeFilter, sortFilter } from '../constants/filters';
 import SortModal from '../components/SortModal';
@@ -135,7 +132,7 @@ const AllAnimeScreen = ({navigation}:any) => {
                         <Pressable onPress={openSortModal}
                             onPressIn={ sortAnimatedPress.animateColorPressIn }
                             onPressOut={ sortAnimatedPress.animateColorPressOut }
-                            style={[styles.filterIconButton,]}
+                            style={[styles.filterIconButton]}
                         >
                             <MaterialCommunityIcons name="sort-variant" size={FONTSIZE.size_20} color={COLORS.White} />
                         </Pressable>
@@ -144,7 +141,7 @@ const AllAnimeScreen = ({navigation}:any) => {
                         <Pressable onPress={openFiltersModal}
                             onPressIn={ filterAnimatedPress.animateColorPressIn }
                             onPressOut={ filterAnimatedPress.animateColorPressOut }
-                            style={[styles.filterIconButton,]}
+                            style={[styles.filterIconButton]}
                         >
                             <AntDesign name="filter" size={FONTSIZE.size_20} color={COLORS.White} />
                         </Pressable>

@@ -1,5 +1,5 @@
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import { Dimensions, TouchableOpacity, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import swfFilterStore from '../store/swfFilterStore';
 import statusBarHeight from '../utils/getStatusBarHeight';
@@ -10,6 +10,18 @@ const SWFFilterScreen = () => {
 
     const { isSWFEnabled,enableSWF,disableSWF } = swfFilterStore();
 
+    const [ swfEnabled, setSwfEnabled] = useState(isSWFEnabled);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            swfEnabled?enableSWF():disableSWF();
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [swfEnabled]);
+
   return (
     <View style = {styles.screenContainer}>
         <View style = {styles.headerContainer}>
@@ -17,18 +29,20 @@ const SWFFilterScreen = () => {
         </View>
         <View style = {styles.contentContainer}>
             <Text style = {styles.sectionHeading}>Safe Browsing</Text>
-            <View style = {styles.filterContainer}>
-                <Pressable style = {[
+            <TouchableOpacity activeOpacity={.8} 
+                onPress={()=>setSwfEnabled(true)}
+                style = {styles.filterContainer}
+            >
+                <View style = {[
                     styles.radioWrapper,
-                    isSWFEnabled?{borderColor : COLORS.Lime}:{borderColor : COLORS.WhiteRGBA60}
+                    swfEnabled?{borderColor : COLORS.Lime}:{borderColor : COLORS.WhiteRGBA60}
                 ]}
-                onPress={enableSWF}
                 >
                     <View style = {[
                         styles.radioInnerCircle,
-                        isSWFEnabled?{backgroundColor : COLORS.Lime}:{backgroundColor : COLORS.Black}
+                        swfEnabled?{backgroundColor : COLORS.Lime}:{backgroundColor : COLORS.Black}
                     ]}></View>
-                </Pressable>
+                </View>
                 <View style = {styles.filterDetailsWrapper}>
                     <View style = {styles.filterHeader}>
                         <Text style={[styles.filterLabel,{backgroundColor:COLORS.Lime}]}>SFW</Text>
@@ -40,19 +54,21 @@ const SWFFilterScreen = () => {
                         </Text>
                     </View>
                 </View>
-            </View>
-            <View style = {styles.filterContainer}>
-                <Pressable style = {[
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={.8} 
+                onPress={()=>setSwfEnabled(false)}
+                style = {styles.filterContainer}
+            >
+                <View style = {[
                     styles.radioWrapper,
-                    !isSWFEnabled?{borderColor : COLORS.Red}:{borderColor : COLORS.WhiteRGBA60}
+                    !swfEnabled?{borderColor : COLORS.Red}:{borderColor : COLORS.WhiteRGBA60}
                 ]}
-                onPress={disableSWF}
                 >
                     <View style = {[
                         styles.radioInnerCircle,
-                        !isSWFEnabled?{backgroundColor : COLORS.Red}:{backgroundColor : COLORS.Black}
+                        !swfEnabled?{backgroundColor : COLORS.Red}:{backgroundColor : COLORS.Black}
                     ]}></View>
-                </Pressable>
+                </View>
                 <View style = {styles.filterDetailsWrapper}>
                     <View style = {{ flexDirection : "row",gap:SPACING.space_15 }}>
                         <Text style={[styles.filterLabel,{backgroundColor:COLORS.Red}]}>NSFW</Text>
@@ -64,7 +80,7 @@ const SWFFilterScreen = () => {
                         </Text>
                     </View>
                 </View>
-            </View>
+            </TouchableOpacity>
         </View>
     </View>
   )

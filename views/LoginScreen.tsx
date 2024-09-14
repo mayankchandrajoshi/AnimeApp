@@ -8,7 +8,7 @@ import useAnimatedPress from '../utils/animatedPress'
 import userStore from '../store/userStore'
 import axios from 'axios'
 import { userInterface } from '../interface/commonInterface'
-import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
+import Toast from 'react-native-toast-message'
 
 const LoginScreen = ({navigation}:any) => {
   const [ email,setEmail ]  = useState("");
@@ -26,8 +26,8 @@ const LoginScreen = ({navigation}:any) => {
     if (!emailPattern.test(email)) {
       setIsLoginInProcess(false);
       return Toast.show({
-        type: ALERT_TYPE.WARNING,
-        textBody: 'Please enter a valid email address.',
+        type: 'error',
+        text1: 'Please enter a valid email address.'
       })
     } 
 
@@ -47,16 +47,16 @@ const LoginScreen = ({navigation}:any) => {
     } catch (error:any) {
       if(error.response.data.message) {
         Toast.show({
-          type: ALERT_TYPE.DANGER,
-          textBody: error.response.data.message,
+          type: 'error',
+          text1: error.response.data.message,
         })
       }
       else {
         console.log(error);
         Toast.show({
-          type: ALERT_TYPE.DANGER,
-          textBody: "An error occurred.",
-        })
+          type: 'error',
+          text1: 'An error occurred.'
+        });
       }
     }
     finally{

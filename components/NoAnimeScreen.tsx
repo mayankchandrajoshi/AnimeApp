@@ -24,8 +24,8 @@ const NoAnimeScreen:React.FC<Props> = ({heading,subHeading,navigation}) => {
             <Text style={styles.heading}>{heading}</Text>
             <Text style={styles.subHeading}>{subHeading}</Text>
             <View style={styles.buttonContainer}>
-                <Animated.View style={[styles.animatedContiner,{backgroundColor}]}>
-                    <Pressable onPress={()=>{navigation.navigate("BrowseStack")}} onPressIn={animateColorPressIn} onPressOut={animateColorPressOut} style={{width:"100%",alignItems:"center"}}>
+                <Animated.View style={[styles.animatedContainer,{backgroundColor}]}>
+                    <Pressable onPress={()=>{navigation.navigate("Browse")}} onPressIn={animateColorPressIn} onPressOut={animateColorPressOut} style={{width:"100%",alignItems:"center"}}>
                         <Text style={styles.buttonText}>BROWSE ALL</Text>
                     </Pressable>
                 </Animated.View>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
         backgroundColor : COLORS.OrangeRed,
         marginTop : SPACING.space_15,
     },
-    animatedContiner : {
+    animatedContainer : {
         justifyContent : "center",
         alignItems : "center",
     },

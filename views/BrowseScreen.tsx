@@ -28,7 +28,7 @@ const Screens = [
   },
   {
     name: "Music",
-    component: MusicScreen,
+    component: (navigation:any)=><MusicScreen navigation={navigation}/>,
     width : estimateTextWidth("Music".toUpperCase(),FONTSIZE.size_12)+30-2 
   },
 ];

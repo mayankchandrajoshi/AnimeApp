@@ -3,8 +3,12 @@
     "name": "AnimeApp",
     "slug": "AnimeApp",
     "version": "1.0.0",
-    "scheme": "AnimeApp", 
-    "platforms": ["ios", "android", "web"],
+    "scheme": "animeapp",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "orientation": "portrait",
     "icon": "./assets/splash.png",
     "userInterfaceStyle": "light",
@@ -20,13 +24,26 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/splash.png",
         "backgroundColor": "#000000"
-      }
+      },
+      "package": "com.mayankjoshi9871.AnimeApp"
     },
     "web": {
       "favicon": "./assets/splash.png"
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7d2cdf74-886b-4f57-8da0-6c9f2cc86f76"
+      }
+    },
+    "owner": "mayankjoshi9871",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7d2cdf74-886b-4f57-8da0-6c9f2cc86f76"
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Animated, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Animated, FlatList, Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import useAnimatedPress from '../utils/animatedPress';
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes';
@@ -22,6 +22,9 @@ const SortModal = ({ sortBy,setSortBy,sortOrder,setSortOrder,translateXSortModal
             visible={showModal}
             onRequestClose={closeModal}
         >
+            {
+                <StatusBar barStyle={'light-content'} backgroundColor={COLORS.Black} animated/>
+            }
             <Animated.View 
             style={[styles.modalContainer,{transform: [{translateX:translateXSortModal }] }]}>
                 <View style={styles.modalHeader}>

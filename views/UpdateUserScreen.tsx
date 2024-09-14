@@ -10,7 +10,7 @@ import useAnimatedPress from '../utils/animatedPress';
 import axios from 'axios';
 import { userInterface } from '../interface/commonInterface';
 import convertToBase64 from '../utils/convertImageBase64';
-import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
+import Toast from 'react-native-toast-message';
 
 const { width,height } = Dimensions.get("screen")
 
@@ -54,8 +54,8 @@ const UpdateUserScreen = ({navigation}:any) => {
         if (!result.canceled) {
             const imageBase64 = await convertToBase64(result.assets[0].uri);
             if(!imageBase64) return Toast.show({
-                type: ALERT_TYPE.DANGER,
-                textBody: 'Error converting image to base64',
+                type: "error",
+                text1: 'Error converting image to base64',
             })
             setProfileImg(imageBase64); 
         }
@@ -63,6 +63,13 @@ const UpdateUserScreen = ({navigation}:any) => {
 
     const handleSubmit = async() => {
         setIsUpdatingUser(true);
+        if(!name||name?.length<=3){
+            setIsUpdatingUser(false);
+            return Toast.show({
+                type: 'error',
+                text1: "Name cannot be less than 3 character",
+            })
+        }
         try {
             const newData:{
                 name?:string,
@@ -87,16 +94,16 @@ const UpdateUserScreen = ({navigation}:any) => {
         } catch (error:any) {
             if(error.response.data.message) {
                 Toast.show({
-                    type: ALERT_TYPE.DANGER,
-                    textBody: error.response.data.message,
+                    type: 'error',
+                    text1: error.response.data.message,
                 })
             }
             else {
                 console.log(error);
                 Toast.show({
-                    type: ALERT_TYPE.DANGER,
-                    textBody: "An error occurred.",
-                })
+                    type: 'error',
+                    text1: 'An error occurred.'
+                });
             }
         }
         finally{

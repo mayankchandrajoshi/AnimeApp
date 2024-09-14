@@ -219,7 +219,7 @@ const AnimeDetailsScreen = ({navigation}:any) => {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={[COLORS.Black,COLORS.BlackRGB90,COLORS.BlackRGB85,COLORS.BlackRGB60,'transparent']} locations={[.25,.5,.6,.8,1]} style={[styles.subContainer]}>
+      <LinearGradient colors={[COLORS.Black,COLORS.BlackRGB90,COLORS.BlackRGB85,COLORS.BlackRGB60,'transparent']} locations={[.2,.5,.6,.8,1]} style={[styles.subContainer]}>
         <Animated.View style={[{backgroundColor:backgroundColorBackBtn,padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_20}]}>
             <Pressable onPress={()=>navigation.goBack()} onPressIn={animateColorPressInBackBtn} onPressOut={()=>{animateColorPressOutBackBtn();setTimeout(()=>setShowBackBtnTooltip(false),700)}} onLongPress={()=>{Vibration.vibrate(100);setShowBackBtnTooltip(true)}}>
               <MaterialIcons name="arrow-back" size={FONTSIZE.size_24} color={COLORS.White} />
@@ -294,7 +294,10 @@ const AnimeDetailsScreen = ({navigation}:any) => {
               presentationStyle='fullScreen'
               visible={showAnimeDetails}
               onRequestClose={() => setShowAnimeDetails(false)}
-            >
+            >  
+              {
+                <StatusBar barStyle={'light-content'} backgroundColor={COLORS.Black} animated/>
+              }
               <View style={styles.showDetailsModal}>
                 <View style={styles.animeDetailsModalHeader}>
                   <Pressable onPress={() => setShowAnimeDetails(false)}>
@@ -307,11 +310,11 @@ const AnimeDetailsScreen = ({navigation}:any) => {
                   </View>
                 </View>
                 <ScrollView bounces={false} contentContainerStyle={{padding:SPACING.space_15,paddingBottom:SPACING.space_52}}>
-                  <Text style={[styles.textWhite16Regular,{color:COLORS.WhiteRGBA90,lineHeight:SPACING.space_24}]}>
+                  {animeDetails.synopsis &&<Text style={[styles.textWhite16Regular,{color:COLORS.WhiteRGBA90,lineHeight:SPACING.space_24}]}>
                     {
                       (animeDetails.synopsis as string).replace('\n\n[Written by MAL Rewrite]','')
                     }
-                  </Text>
+                  </Text>}
                   {animeDetails.episodes&&(
                     <View style={{paddingVertical:SPACING.space_15,gap:SPACING.space_8}}>
                       <Text style={[styles.textWhite14Regular,{color:COLORS.WhiteRGBA90}]}>
@@ -330,7 +333,7 @@ const AnimeDetailsScreen = ({navigation}:any) => {
                       {animeDetails.duration}
                     </Text>
                   </View>
-                  {animeDetails.licensors.length>=1&&(
+                  {(animeDetails.licensors&&animeDetails.licensors.length>=1)&&(
                     <View style={{paddingVertical:SPACING.space_15,gap:SPACING.space_8}}>
                       <Text style={[styles.textWhite14Regular,{color:COLORS.WhiteRGBA90}]}>
                         Publisher
@@ -374,7 +377,7 @@ const AnimeDetailsScreen = ({navigation}:any) => {
                       }
                     </View>
                   </View>
-                  {animeDetails.streaming.length>=1&&(
+                  {(animeDetails.streaming&&animeDetails.streaming.length>=1)&&(
                     <View style={{paddingVertical:SPACING.space_15,gap:SPACING.space_8}}>
                       <Text style={[styles.textWhite14Regular,{color:COLORS.WhiteRGBA90}]}>
                         Streaming On

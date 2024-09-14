@@ -9,7 +9,7 @@ import { ActivityIndicator } from 'react-native-paper';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import userStore from '../store/userStore';
-import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
+import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get("screen")
 
@@ -47,20 +47,24 @@ const AuthenticationScreen = ({navigation}:any) => {
 
                     login(user);
                 }
+                else {
+                    setIsGoogleLoggingInProgress(false);
+                }
             }
         } catch (error:any) {
+            setIsGoogleLoggingInProgress(false);
             if(error.response.data.message) {
                 Toast.show({
-                    type: ALERT_TYPE.DANGER,
-                    textBody: error.response.data.message,
+                    type: 'error',
+                    text1: error.response.data.message,
                 })
             }
             else {
                 console.log(error);
                 Toast.show({
-                    type: ALERT_TYPE.DANGER,
-                    textBody: "An error occurred.",
-                })
+                    type: 'error',
+                    text1: 'An error occurred.'
+                });
             }
         }
     }
@@ -80,16 +84,16 @@ const AuthenticationScreen = ({navigation}:any) => {
                     } catch (error:any) {
                         if(error.response.data.message) {
                             Toast.show({
-                                type: ALERT_TYPE.DANGER,
-                                textBody: error.response.data.message,
+                                type: 'error',
+                                text1: error.response.data.message,
                             })
                         }
                         else {
                             console.log(error);
                             Toast.show({
-                                type: ALERT_TYPE.DANGER,
-                                textBody: "An error occurred.",
-                            })
+                                type: 'error',
+                                text1: 'An error occurred.'
+                            });
                         }
                     }
                 }

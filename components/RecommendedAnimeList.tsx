@@ -41,7 +41,7 @@ const RecommendedAnimeList = ({id,navigation}:{id:number,navigation:any}) => {
 
     return (
         <View style={styles.container}>
-            {isLoadingData?<FlatList data={new Array(16)} numColumns={3} keyExtractor={(item,index) => String(index)}
+            {isLoadingData?<FlatList data={new Array(17)} numColumns={3} keyExtractor={(item,index) => String(index)}
                 style={styles.cardsWrapper} 
                 columnWrapperStyle = {styles.cardsWrapperRow}
                 contentContainerStyle = {{gap:SPACING.space_10}}
@@ -53,7 +53,7 @@ const RecommendedAnimeList = ({id,navigation}:{id:number,navigation:any}) => {
                     style={[styles.cardsWrapper]} 
                     columnWrapperStyle = {styles.cardsWrapperRow}
                     contentContainerStyle = {{gap:SPACING.space_10}}
-                    renderItem={({item,index})=><View style={styles.cardWrapper}><AnimeNameCard id={item.entry.mal_id} name ={item.entry.title_english||item.entry.title} image_url ={item.entry.images.jpg.large_image_url||item.entry.images.jpg.image_url}  width={(width-(SPACING.space_15*2+SPACING.space_6*2))/3} viewAnime={(id:number)=>{navigation.push('AnimeDetails', {id})}} /></View>}
+                    renderItem={({item,index})=><AnimeNameCard id={item.entry.mal_id} name ={item.entry.title_english||item.entry.title} image_url ={item.entry.images.jpg.large_image_url||item.entry.images.jpg.image_url}  width={(width-(SPACING.space_15*2+SPACING.space_6*2))/3} viewAnime={(id:number)=>{navigation.push('AnimeDetails', {id})}} />}
                 />):<NoAnimeScreen heading="No Anime found" subHeading='Explore more anime' navigation={navigation}/>
             )}
         </View>
@@ -78,9 +78,6 @@ const styles = StyleSheet.create({
     cardsWrapperRow : {
         gap:SPACING.space_6,
         backgroundColor:COLORS.Black,
-        paddingHorizontal:SPACING.space_15
+        paddingHorizontal:SPACING.space_15,
     },
-    cardWrapper: {
-        flex: 1,
-    }
 })

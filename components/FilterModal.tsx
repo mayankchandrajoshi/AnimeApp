@@ -1,5 +1,5 @@
-import { Animated, Dimensions, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import { Animated, Dimensions, FlatList, Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import useAnimatedPress from '../utils/animatedPress';
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes';
 import { AntDesign } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import Slider from '@react-native-community/slider';
 import { is1DArrayEqual } from '../utils/compareArray';
 import { allAnimeGenres, animeRatingFilter, animeTypeFilter } from '../constants/filters';
 import Checkbox from 'expo-checkbox';
+import statusBarHeight from '../utils/getStatusBarHeight';
 
 const { width } = Dimensions.get("screen")
 
@@ -33,6 +34,9 @@ const FilterModal = ({animeType,setAnimeType,animeRating,setAnimeRating,animeGen
             visible={showModal}
             onRequestClose={closeModal}
         >
+            {
+                <StatusBar barStyle={'light-content'} backgroundColor={COLORS.Black} />
+            }
             <Animated.View 
             style={[styles.modalContainer,{transform: [{translateX:translateXFilterModal }] }]}>
                 <View style={styles.modalHeader}>
@@ -97,32 +101,29 @@ const FilterModal = ({animeType,setAnimeType,animeRating,setAnimeRating,animeGen
                     </View>
                     <View style={styles.modalContentSection}>
                         <Text style={styles.modalSectionHeading}>Genres</Text>
-                        <View style={[styles.filterOptionsWrapper,{flexDirection:"row",flexWrap:"wrap"}]}>
-                            {
-                                allAnimeGenres.map((item)=>{
-                                    return (
-                                        <View style={styles.filterOptionContainer} key={item.id}>
-                                            <Checkbox
-                                                value={selectedAnimeGenres.includes(item.id)}
-                                                color={COLORS.OrangeRed}
-                                                onValueChange={()=>{
-                                                    selectedAnimeGenres.includes(item.id)?setSelectedAnimeGenres((prevGenres)=>prevGenres.filter((id)=>id!==item.id)):setSelectedAnimeGenres((prevGenres)=>prevGenres.concat(item.id))
-                                                }}
-                                            />
-                                            <Pressable 
-                                                onPress={()=>{
-                                                        selectedAnimeGenres.includes(item.id)?setSelectedAnimeGenres((prevGenres)=>prevGenres.filter((id)=>id!==item.id)):setSelectedAnimeGenres((prevGenres)=>prevGenres.concat(item.id))
-                                                    }}
-                                            >
-                                                <View style={styles.modalTextWrapper}>
-                                                    <Text style={styles.filterName}>{item.name}</Text>
-                                                </View>
-                                            </Pressable>
-                                        </View>
-                                    )
-                                })
-                            }
-                        </View>
+                        <FlatList data={allAnimeGenres} numColumns={2} 
+                            keyExtractor={(item, index) => String(index)}
+                            scrollEnabled={false}
+                            renderItem={({item})=>(
+                            <View style={[styles.filterOptionContainer,{ gap:SPACING.space_8,paddingVertical : SPACING.space_10,width:width/2 }]} key={item.id}>
+                                <Checkbox
+                                    value={selectedAnimeGenres.includes(item.id)}
+                                    color={COLORS.OrangeRed}
+                                    onValueChange={()=>{
+                                        selectedAnimeGenres.includes(item.id)?setSelectedAnimeGenres((prevGenres)=>prevGenres.filter((id)=>id!==item.id)):setSelectedAnimeGenres((prevGenres)=>prevGenres.concat(item.id))
+                                    }}
+                                />
+                                <Pressable 
+                                    onPress={()=>{
+                                            selectedAnimeGenres.includes(item.id)?setSelectedAnimeGenres((prevGenres)=>prevGenres.filter((id)=>id!==item.id)):setSelectedAnimeGenres((prevGenres)=>prevGenres.concat(item.id))
+                                        }}
+                                >
+                                    <View style={styles.modalTextWrapper}>
+                                        <Text style={styles.filterName}>{item.name}</Text>
+                                    </View>
+                                </Pressable>
+                            </View>
+                        )}/>
                     </View>
                     <View style={styles.modalContentSection}>
                         <Text style={styles.modalSectionHeading}>Minimum Score {"\u00A0\u00A0:\u00A0\u00A0"+selectedMinScore}</Text>

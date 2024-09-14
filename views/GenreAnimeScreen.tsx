@@ -1,6 +1,5 @@
 import { Animated, Dimensions, Pressable, StyleSheet, Text, Vibration, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { BrowseStackParamList } from '../types/navigationTypes';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes';
@@ -12,10 +11,11 @@ import { searchAnime } from '../api/apicalls';
 import { sortFilter } from '../constants/filters';
 import axios from 'axios';
 import statusBarHeight from '../utils/getStatusBarHeight'
+import { RootStackParamList } from '../types/navigationTypes';
 
 const { width } = Dimensions.get("screen")
 
-type GenreAnimeScreenRouteProp = RouteProp<BrowseStackParamList,  'GenreAnime'>;
+type GenreAnimeScreenRouteProp = RouteProp<RootStackParamList,  'GenreAnime'>;
 
 const getSearchAnime = async(genreId:number,sortBy:number,sortOrder:"asc"|"desc",isSWFEnabled:true|false,page:number=1)=>{
   try {
@@ -42,6 +42,8 @@ const GenreAnimeScreen = ({navigation}:any) => {
   const [ genreAnimeList,setGenreAnimeList ] = useState<any[]>([]);
 
   const [ showSortModal,setShowSortModal ] = useState(false);
+
+  const [ showBackTooltip,setShowBackTooltip ] = useState(false);
 
   const { isSWFEnabled } = swfFilterStore();
 
@@ -111,24 +113,28 @@ const GenreAnimeScreen = ({navigation}:any) => {
       <View style={styles.header}>
         <View style={styles.headingContainer}>
           <Animated.View style={[{backgroundColor:backgroundColorBackBtn,padding:SPACING.space_8,borderRadius:BORDERRADIUS.radius_20}]}>
-            <Pressable onPress={()=>navigation.goBack()} onPressIn={animateColorPressInBackBtn} onPressOut={animateColorPressOutBackBtn} onLongPress={()=>Vibration.vibrate(100)}>
+            <Pressable onPress={()=>navigation.goBack()} onPressIn={animateColorPressInBackBtn} onPressOut={()=>{animateColorPressOutBackBtn();setTimeout(()=>setShowBackTooltip(false),700)}} onLongPress={()=>{Vibration.vibrate(100);setShowBackTooltip(true)}}>
               <MaterialIcons name="arrow-back" size={FONTSIZE.size_24} color={COLORS.White} />
+                {showBackTooltip && <Text style={[styles.iconToolTip,{ width : 70,left : "0%", }]}>
+                    Back
+                  </Text>}
             </Pressable>
           </Animated.View>
           <Text style={styles.heading}>{name}</Text>
         </View>
       </View>
-      <View style={styles.container}>
+      <View style={{flex:1}}>
         <View style={styles.sortHeader}>
           <View>
             <Text style={[styles.heading,{fontSize:FONTSIZE.size_16}]}>{sortFilter[sortBy].name}</Text>
           </View>
-          <Animated.View style={[styles.filterIconButton,{ backgroundColor : sortAnimatedPress.backgroundColor }]}>
+          <Animated.View style={[{ backgroundColor : sortAnimatedPress.backgroundColor }]}>
               <Pressable onPress={openSortModal}
-                  onPressIn={ sortAnimatedPress.animateColorPressIn }
-                  onPressOut={ sortAnimatedPress.animateColorPressOut }
+                onPressIn={ sortAnimatedPress.animateColorPressIn }
+                onPressOut={ sortAnimatedPress.animateColorPressOut }
+                style={styles.filterIconButton}
               >
-                  <MaterialCommunityIcons name="sort-variant" size={FONTSIZE.size_24} color={COLORS.White} />
+                <MaterialCommunityIcons name="sort-variant" size={FONTSIZE.size_24} color={COLORS.White} />
               </Pressable>
         </Animated.View>
         </View>
@@ -180,5 +186,24 @@ const styles = StyleSheet.create({
   filterIconButton : {
     paddingVertical : SPACING.space_12,
     paddingHorizontal : SPACING.space_12,
+  },
+  iconToolTip : {
+    position : "absolute",
+    bottom:'-180%',
+    right : "-0%",
+    zIndex : 99999,
+    textAlign : "center",
+    backgroundColor : COLORS.White,
+    fontSize:FONTSIZE.size_14,
+    fontFamily:FONTFAMILY.lato_regular,
+    color:COLORS.Black,
+    paddingHorizontal : SPACING.space_16,
+    paddingVertical:SPACING.space_8,
+    borderRadius : SPACING.space_2,
+    elevation: 5,
+    shadowColor: COLORS.Black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 })

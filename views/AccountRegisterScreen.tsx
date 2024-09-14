@@ -10,8 +10,7 @@ import userStore from '../store/userStore'
 import axios from 'axios'
 import { userInterface } from '../interface/commonInterface'
 import convertToBase64 from '../utils/convertImageBase64'
-import { ALERT_TYPE } from 'react-native-alert-notification'
-import { Toast } from 'react-native-alert-notification'
+import Toast from 'react-native-toast-message'
 
 const { width,height } = Dimensions.get("screen")
 
@@ -62,8 +61,8 @@ const AccountRegisterScreen = ({navigation}:any) => {
 
       if(!imageBase64){
         return Toast.show({
-          type: ALERT_TYPE.DANGER,
-          textBody: 'Error converting image to base64',
+          type: 'error',
+          text1: 'Error converting image to base64',
         })
       }
 
@@ -76,30 +75,30 @@ const AccountRegisterScreen = ({navigation}:any) => {
     if(!image){
       setIsSignUpInProcess(false);
       return Toast.show({
-        type: ALERT_TYPE.WARNING,
-        textBody: "Please select an image",
+        type: 'error',
+        text1: "Please select an image",
       })
     }
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
       setIsSignUpInProcess(false);
       return Toast.show({
-        type: ALERT_TYPE.WARNING,
-        textBody: "Please enter a valid email address.",
+        type: 'error',
+        text1: "Please enter a valid email address.",
       })
     } 
     if (password.length<=8) {
       setIsSignUpInProcess(false);
       return Toast.show({
-        type: ALERT_TYPE.WARNING,
-        textBody: "Password cannot be less than 9 character",
+        type: 'error',
+        text1: "Password cannot be less than 9 character",
       })
     } 
     if (confirmPassword!=password) {
       setIsSignUpInProcess(false);
       return Toast.show({
-        type: ALERT_TYPE.WARNING,
-        textBody: "Password and confirm password doesn't match",
+        type: 'error',
+        text1: "Password and confirm password doesn't match",
       })
     } 
 
@@ -128,16 +127,16 @@ const AccountRegisterScreen = ({navigation}:any) => {
     } catch (error:any) {
       if(error.response.data.message) {
         Toast.show({
-          type: ALERT_TYPE.DANGER,
-          textBody: error.response.data.message,
+          type: 'error',
+          text1: error.response.data.message,
         })
       }
       else {
         console.log(error);
         Toast.show({
-          type: ALERT_TYPE.DANGER,
-          textBody: "An error occurred.",
-        })
+          type: 'error',
+          text1: 'An error occurred.'
+        });
       }
     }
     finally{
