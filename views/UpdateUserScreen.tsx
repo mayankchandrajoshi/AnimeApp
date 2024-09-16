@@ -11,12 +11,13 @@ import axios from 'axios';
 import { userInterface } from '../interface/commonInterface';
 import convertToBase64 from '../utils/convertImageBase64';
 import Toast from 'react-native-toast-message';
+import * as SecureStore from 'expo-secure-store';
 
 const { width,height } = Dimensions.get("screen")
 
 const UpdateUserScreen = ({navigation}:any) => {
 
-    const { userData ,update } = userStore();
+    const { userData ,login } = userStore();
 
     const [ profileImg,setProfileImg ] = useState(userData.user?.avatar.url);
     const [ name,setName ] = useState(userData.user?.name);
@@ -63,7 +64,7 @@ const UpdateUserScreen = ({navigation}:any) => {
 
     const handleSubmit = async() => {
         setIsUpdatingUser(true);
-        if(!name||name?.length<=3){
+        if(!name||name?.length<3){
             setIsUpdatingUser(false);
             return Toast.show({
                 type: 'error',
@@ -82,17 +83,18 @@ const UpdateUserScreen = ({navigation}:any) => {
             if(profileImg!==userData.user?.avatar.url){
                 newData.avatar = profileImg;
             }
-
-            const config = { headers: {  "Content-Type": "application/json" } ,withCredentials: true };
+            
+            const token = await SecureStore.getItemAsync('JWTToken');
+            const config ={ headers : {"Content-Type":"application/json",'Authorization': `Bearer ${token}`}};
 
             await axios.patch('https://anime-backend-delta.vercel.app/api/v1/user/update',newData,config);
 
             const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',config);
 
-            update(user);
+            login(user);
             navigation.goBack();
         } catch (error:any) {
-            if(error.response.data.message) {
+            if(error?.response?.data?.message) {
                 Toast.show({
                     type: 'error',
                     text1: error.response.data.message,

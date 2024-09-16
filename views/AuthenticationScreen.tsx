@@ -10,6 +10,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import userStore from '../store/userStore';
 import Toast from 'react-native-toast-message';
+import * as SecureStore from 'expo-secure-store';
 
 const { width } = Dimensions.get("screen")
 
@@ -25,35 +26,34 @@ const AuthenticationScreen = ({navigation}:any) => {
 
     const handleGoogleLogin = async() =>{
         setIsGoogleLoggingInProgress(true);
-
         try {
             const redirectUri = Linking.createURL('login'); 
+            const googleAuthUrl = `https://anime-backend-delta.vercel.app/api/v1/google?frontendUrl=${encodeURIComponent(redirectUri)}`
 
-            if(Platform.OS === 'web') {
-                Linking.openURL(
-                    `https://anime-backend-delta.vercel.app/api/v1/google?frontendUrl=${encodeURIComponent(redirectUri)}`
-                );
+            const result = await WebBrowser.openAuthSessionAsync(googleAuthUrl,redirectUri);
+
+            if (result.type === 'success' && result.url) {
+
+                const token = result.url.split('=')[1];
+
+                await SecureStore.setItemAsync('JWTToken', token);
+                
+                const config = { headers: { "Content-Type": "application/json",'Authorization': `Bearer ${token}` }};
+                
+                const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',config);
+
+                login(user);
             }
-            else {
-                const googleAuthUrl = `https://anime-backend-delta.vercel.app/api/v1/google?frontendUrl=${encodeURIComponent(redirectUri)}`
-
-                const result = await WebBrowser.openAuthSessionAsync(googleAuthUrl,redirectUri);
-
-                if (result.type === 'success' && result.url) {
-                    
-                    const config = { headers: { "Content-Type": "application/json" },withCredentials: true };
-                    
-                    const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',config);
-
-                    login(user);
-                }
-                else {
-                    setIsGoogleLoggingInProgress(false);
-                }
+            else { 
+                Toast.show({
+                    type: 'error',
+                    text1: 'Login failed. Please try again.',
+                })
             }
+            setIsGoogleLoggingInProgress(false);
         } catch (error:any) {
             setIsGoogleLoggingInProgress(false);
-            if(error.response.data.message) {
+            if(error?.response?.data?.message) {
                 Toast.show({
                     type: 'error',
                     text1: error.response.data.message,
@@ -68,39 +68,6 @@ const AuthenticationScreen = ({navigation}:any) => {
             }
         }
     }
-
-    useEffect(()=>{
-        (async () => {
-            const url = await Linking.getInitialURL();
-            if(url&&url.includes("login_successful")) {
-                const isLoginSuccessful =  url.split('?')[1].split("=")[1];
-                if(isLoginSuccessful == "true" && !userData.isAuthenticated ){
-                    try {
-                        const config = { headers: { "Content-Type": "application/json" },withCredentials: true };
-                
-                        const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',config);
-
-                        login(user);
-                    } catch (error:any) {
-                        if(error.response.data.message) {
-                            Toast.show({
-                                type: 'error',
-                                text1: error.response.data.message,
-                            })
-                        }
-                        else {
-                            console.log(error);
-                            Toast.show({
-                                type: 'error',
-                                text1: 'An error occurred.'
-                            });
-                        }
-                    }
-                }
-            }
-            setIsGoogleLoggingInProgress(false);
-        })();
-    },[]);
     
     return (
         <View style={styles.container}>

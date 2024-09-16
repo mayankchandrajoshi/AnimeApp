@@ -9,6 +9,7 @@ import userStore from '../store/userStore'
 import axios from 'axios'
 import { userInterface } from '../interface/commonInterface'
 import Toast from 'react-native-toast-message'
+import * as SecureStore from 'expo-secure-store';
 
 const LoginScreen = ({navigation}:any) => {
   const [ email,setEmail ]  = useState("");
@@ -32,20 +33,22 @@ const LoginScreen = ({navigation}:any) => {
     } 
 
     try {
-      const config = { headers: { "Content-Type": "application/json" },withCredentials: true };
-      
-      await axios.post('https://anime-backend-delta.vercel.app/api/v1/login',{
+      const { data : { token } }: { data: { token: string } } = await axios.post('https://anime-backend-delta.vercel.app/api/v1/login',{
         email,password
-      },config)
+      },{ headers: { "Content-Type": "application/json" }})
+
+      await SecureStore.setItemAsync('JWTToken', token);
 
       const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',{
-        ...config,
-      });
+        headers : {
+          "Content-Type":"application/json",
+          'Authorization': `Bearer ${token}`
+      }});
 
       login(user);
 
     } catch (error:any) {
-      if(error.response.data.message) {
+      if(error?.response?.data?.message) {
         Toast.show({
           type: 'error',
           text1: error.response.data.message,

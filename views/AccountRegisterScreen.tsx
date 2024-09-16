@@ -11,6 +11,7 @@ import axios from 'axios'
 import { userInterface } from '../interface/commonInterface'
 import convertToBase64 from '../utils/convertImageBase64'
 import Toast from 'react-native-toast-message'
+import * as SecureStore from 'expo-secure-store';
 
 const { width,height } = Dimensions.get("screen")
 
@@ -103,7 +104,7 @@ const AccountRegisterScreen = ({navigation}:any) => {
     } 
 
     try {
-      const config = { headers: { "Content-Type": "multipart/form-data" } ,withCredentials: true };
+      const config = { headers: { "Content-Type": "multipart/form-data" } };
       
       const myForm = new FormData();
       myForm.append("name", name);
@@ -114,18 +115,22 @@ const AccountRegisterScreen = ({navigation}:any) => {
 
       await axios.post('https://anime-backend-delta.vercel.app/api/v1/register',myForm,config);
 
-      const loginConfig = { headers: { "Content-Type": "application/json" },withCredentials: true };
-      
-      await axios.post('https://anime-backend-delta.vercel.app/api/v1/login',{
+      const { data : { token } }: { data: { token: string } } = await axios.post('https://anime-backend-delta.vercel.app/api/v1/login',{
         email,password
-      },loginConfig)
+      },{ headers: { "Content-Type": "application/json" }})
 
-      const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',config);
+      await SecureStore.setItemAsync('JWTToken', token);
+
+      const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',{
+        headers : {
+          "Content-Type":"application/json",
+          'Authorization': `Bearer ${token}`
+      }});
 
       login(user);
 
     } catch (error:any) {
-      if(error.response.data.message) {
+      if(error?.response?.data?.message) {
         Toast.show({
           type: 'error',
           text1: error.response.data.message,

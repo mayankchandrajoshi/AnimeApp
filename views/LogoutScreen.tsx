@@ -7,6 +7,8 @@ import * as NavigationBar from 'expo-navigation-bar'
 import userStore from '../store/userStore';
 import axios from 'axios';
 import { ActivityIndicator } from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store';
+import Toast from 'react-native-toast-message';
 
 const LogoutScreen = ({navigation}:any) => {
 
@@ -21,14 +23,26 @@ const LogoutScreen = ({navigation}:any) => {
     NavigationBar.setBackgroundColorAsync(COLORS.Black);
   },[])
 
+
   const handleLogout = async() => {
     setIsLoggingOut(true);
     try {
-      const config = { withCredentials: true };
-      await axios.get('https://anime-backend-delta.vercel.app/api/v1/logout',config);
+      await SecureStore.deleteItemAsync('JWTToken');
       logout();
     } catch (error:any) {
-      alert(error.response.data.message);
+      if(error?.response?.data?.message) {
+        Toast.show({
+          type: 'error',
+          text1: error.response.data.message,
+        })
+      }
+      else {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'An error occurred.'
+        });
+      }
     }
     finally{
       setIsLoggingOut(false);

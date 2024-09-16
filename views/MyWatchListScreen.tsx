@@ -54,6 +54,7 @@ export default MyWatchListScreen
 const styles = StyleSheet.create({
   container: {
     flex:1,
+    width:width,
     backgroundColor: COLORS.Black
   },
   cardsWrapper : {

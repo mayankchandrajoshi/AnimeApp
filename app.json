@@ -5,9 +5,7 @@
     "version": "1.0.0",
     "scheme": "animeapp",
     "platforms": [
-      "ios",
-      "android",
-      "web"
+      "android"
     ],
     "orientation": "portrait",
     "icon": "./assets/splash.png",
@@ -31,7 +29,8 @@
       "favicon": "./assets/splash.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {

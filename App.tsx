@@ -22,6 +22,9 @@ import * as NavigationBar from 'expo-navigation-bar';
 import userStore from './store/userStore';
 import UpdateUserScreen from './views/UpdateUserScreen';
 import Toast from 'react-native-toast-message';
+import * as SecureStore from 'expo-secure-store';
+import { userInterface } from './interface/commonInterface';
+import axios from 'axios';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,16 +48,43 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const { userData } = userStore();
+  const { login }  = userStore();
 
   useEffect(() => {
     async function prepare() {
       try {
         await NavigationBar.setBackgroundColorAsync(COLORS.Black); 
         await fetchFonts();
+        
+        const token = await SecureStore.getItemAsync('JWTToken');
+        
+        if(token){
+          const { data:{user} }:{ data :{user:userInterface}} = await axios.get('https://anime-backend-delta.vercel.app/api/v1/me',{
+            headers : {
+              "Content-Type":"application/json",
+              'Authorization': `Bearer ${token}`
+          }});
+    
+          login(user);
+        }
+        
         await new Promise(resolve => setTimeout(resolve, 2000)); // To add delay
         setFontsLoaded(true); 
-      } catch (e) {
-        console.error(e);
+
+      } catch (error:any) {
+        if(error?.response?.data?.message) {
+          Toast.show({
+            type: 'error',
+            text1: error.response.data.message,
+          })
+        }
+        else {
+          console.log(error);
+          Toast.show({
+            type: 'error',
+            text1: 'An error occurred.'
+          });
+        }
       } finally {
         await SplashScreen.hideAsync();
       }
