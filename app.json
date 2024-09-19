@@ -1,11 +1,12 @@
 {
   "expo": {
     "name": "AnimeApp",
-    "slug": "AnimeApp",
+    "slug": "animeapp",
     "version": "1.0.0",
     "scheme": "animeapp",
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ],
     "orientation": "portrait",
     "icon": "./assets/splash.png",
@@ -34,7 +35,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "7d2cdf74-886b-4f57-8da0-6c9f2cc86f76"
+        "projectId": "5d1d01f0-bdc0-41f3-a14c-f9d5b4e0c3fb"
       }
     },
     "owner": "mayankjoshi9871",
@@ -42,7 +43,7 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/7d2cdf74-886b-4f57-8da0-6c9f2cc86f76"
+      "url": "https://u.expo.dev/5d1d01f0-bdc0-41f3-a14c-f9d5b4e0c3fb"
     }
   }
 }
