@@ -1,5 +1,5 @@
-import { Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { Animated, Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useRef } from 'react'
 import { COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons'
 import watchListStore from '../store/watchListStore'
@@ -20,6 +20,28 @@ interface MainScreenPosterProps {
 const MainScreenPoster:React.FC<MainScreenPosterProps> = ({id,name,image_url,synopsis,genres,type,viewAnime}) => {
   
   const { watchList,addToWatchList,removeFromWatchList,isAnimeInWatchList }  = watchListStore();
+
+  const cardOpacity = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.parallel([
+            Animated.timing(cardOpacity, {
+                toValue: 0.8,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.parallel([
+            Animated.timing(cardOpacity, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
 
   return (
     <View style={styles.container}>
@@ -46,14 +68,18 @@ const MainScreenPoster:React.FC<MainScreenPosterProps> = ({id,name,image_url,syn
             </Text>
           </View>
           <View style ={styles.actionsContainer}>
-            <TouchableOpacity activeOpacity={0.8} style={styles.viewAnimeButton} 
-              onPress={()=>viewAnime(id)}
-            >
-              <Text style={styles.viewAnimeText}>
-                View Anime
-              </Text>
-            </TouchableOpacity>
-            <Pressable onPress={()=>isAnimeInWatchList({id,name,image_url,type})?removeFromWatchList({id,name,image_url,type}):addToWatchList({id,name,image_url,type})} style={styles.bookmarkIconWrapper}>
+            <Animated.View style={{flex:1,opacity:cardOpacity}}>
+              <TouchableOpacity activeOpacity={1} style={styles.viewAnimeButton} 
+                onPress={()=>viewAnime(id)}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+              >
+                <Text style={styles.viewAnimeText}>
+                  View Anime
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+            <TouchableOpacity activeOpacity={.8} onPress={()=>isAnimeInWatchList({id,name,image_url,type})?removeFromWatchList({id,name,image_url,type}):addToWatchList({id,name,image_url,type})} style={styles.bookmarkIconWrapper}>
               {
                 isAnimeInWatchList({id,name,image_url,type})?<View style={[{minWidth:20}]}>
                   <MaterialIcons name="bookmark" size={FONTSIZE.size_20} color={COLORS.OrangeRed}/>
@@ -61,7 +87,7 @@ const MainScreenPoster:React.FC<MainScreenPosterProps> = ({id,name,image_url,syn
                   <Feather name="bookmark" size={FONTSIZE.size_20} color={COLORS.OrangeRed}/>
                 </View>
               }
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </LinearGradient>

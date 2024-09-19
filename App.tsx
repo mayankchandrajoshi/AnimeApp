@@ -111,12 +111,12 @@ export default function App() {
                 <Stack.Screen 
                   name="Login" 
                   component={LoginScreen}
-                  options={{ presentation:"transparentModal"}}
+                  options={{ presentation:"transparentModal" }}
                 />
                 <Stack.Screen 
                   name="Register" 
                   component={AccountRegisterScreen}
-                  options={{ presentation:"transparentModal"}}
+                  options={{ presentation:"transparentModal" }}
                 />
               </Stack.Group>
             ):(

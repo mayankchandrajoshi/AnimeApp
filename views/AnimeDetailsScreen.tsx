@@ -107,7 +107,7 @@ const AnimeDetailsScreen = ({navigation}:any) => {
   const route = useRoute<AnimeDetailsScreenRouteProp>();
   const { id } = route.params;
 
-  const Screens = [
+  const [ Screens,setScreens ] = useState([
     {
       name: "Episodes",
       component: (navigation: any) => <AnimeEpisodesList navigation={navigation} id={id} />,
@@ -123,7 +123,7 @@ const AnimeDetailsScreen = ({navigation}:any) => {
       component: (navigation: any) => <RecommendedAnimeList navigation={navigation} id={id} />,
       width : estimateTextWidth("Recommended".toUpperCase(),FONTSIZE.size_12)+30-2
     }
-  ];
+  ]);
 
   const { isSWFEnabled } = swfFilterStore();
   const { watchList,addToWatchList,removeFromWatchList,isAnimeInWatchList }  = watchListStore();
@@ -160,14 +160,17 @@ const AnimeDetailsScreen = ({navigation}:any) => {
     })();
   },[id])
 
-  const handleViewMenu = () => {
+  useEffect(()=>{
     moreOptionsRef.current?.measure((fx, fy, width, height, px, py) => {
-        setMoreOptionsPositionLeft(px>windowWidth/2?px-(windowWidth*.47):0);
-        // subtracted windowWidth*.47 so that to shift the action menu equal to its width
+      setMoreOptionsPositionLeft(px>windowWidth/2?px-(windowWidth*.47):0);
+      // subtracted windowWidth*.47 so that to shift the action menu equal to its width
 
-        setMoreOptionsPositionTop(windowHeight-py<(50*(actionList.length+1))?py-(50*actionList.length):py+height+5);
-        // 50*actionList.length is so as get the height of QuickActionList component
+      setMoreOptionsPositionTop(windowHeight-py<(50*(actionList.length+1))?py-(50*actionList.length):py+height+5);
+      // 50*actionList.length is so as get the height of QuickActionList component
     });
+  },[moreOptionsRef.current,actionList.length,windowHeight,windowWidth])
+
+  const handleViewMenu = () => {
     setShowMoreOptions(true);
   }
 

@@ -42,15 +42,11 @@ const BrowseScreen = ({navigation}:any) => {
         }}
         SWFFunction={()=>{
           navigation.navigate('SWFModal');
-        }}/>
+        }}
+      />
       <ScreenSelectionCarousal screens={Screens} navigation={navigation}/>
     </View>
   )
 }
-
-
-const styles = StyleSheet.create({
-
-})
 
 export default BrowseScreen

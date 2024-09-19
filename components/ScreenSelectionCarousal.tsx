@@ -1,5 +1,5 @@
 import { Animated, Dimensions, FlatList, Pressable, StyleSheet, Text, View, ViewToken } from 'react-native'
-import React, { forwardRef, memo, useCallback, useMemo, useRef, useState } from 'react'
+import React, { forwardRef, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import useAnimatedPress from '../utils/animatedPress'
 import { ActivityIndicator } from 'react-native-paper'
@@ -21,9 +21,9 @@ const Tab:React.FC<TabPropsInterface> = memo(({ item,index,scrollToIndex,scrollX
     const {backgroundColor,animateColorPressIn,animateColorPressOut,} = useAnimatedPress("transparent", COLORS.WhiteRGBA15,200,400);
 
     const color = scrollX.interpolate({
-      inputRange : [(index - 1) * width, index * width, (index + 1) * width],
-      outputRange: [COLORS.WhiteRGBA75, COLORS.White, COLORS.WhiteRGBA75],
-      extrapolate: 'clamp',
+        inputRange : [(index - 1) * width, index * width, (index + 1) * width],
+        outputRange: [COLORS.WhiteRGBA75, COLORS.White, COLORS.WhiteRGBA75],
+        extrapolate: 'clamp',
     });
 
     return (
@@ -49,38 +49,34 @@ interface IndicatorProps {
 }
 
 const Indicator = memo(forwardRef<View, IndicatorProps>(({scrollX,screenTitlesWidth,screenTabPosX,scrollXTabs}, ref) => {
-    
-    const inputRange = screenTitlesWidth.map((_,i)=>i*width);
 
     const indicatorWidth = scrollX.interpolate ({
-        inputRange,
+        inputRange : screenTitlesWidth.map((_,i)=>i*width),
         outputRange :  screenTitlesWidth.map((width)=>width),
         extrapolate : 'clamp'
     })
 
     const positionLeft = scrollX.interpolate ({
-        inputRange,
+        inputRange : screenTitlesWidth.map((_,i)=>i*width),
         outputRange : screenTabPosX.map((tabPosX,currIndex)=>{
             return tabPosX;
         }),
         extrapolate : 'clamp'
     })
 
-    const combinedLeftPos = Animated.subtract(positionLeft, scrollXTabs);
     return (
-        <Animated.View style={[styles.currentActiveBar, { width: indicatorWidth,left: combinedLeftPos}]} ref={ref}/>
+        <Animated.View style={[styles.currentActiveBar, { width: indicatorWidth,left: Animated.subtract(positionLeft, scrollXTabs)}]} ref={ref}/>
     )
 }))
 
 interface  ScreenWrapperProps {
-    maxIndexVisited:number,
+    isShow:boolean,
     component: (navigation: any) => React.JSX.Element,
-    index : number,
     navigation : any
 }
 
-const ScreenWrapper : React.FC<ScreenWrapperProps> = ({maxIndexVisited,component,index,navigation})=>{
-    if(index>maxIndexVisited){
+const ScreenWrapper : React.FC<ScreenWrapperProps> = memo(({isShow,component,navigation})=>{
+    if(!isShow){
         return (
             <View style={{width:width,justifyContent:"center",alignItems:"center",backgroundColor:COLORS.WhiteRGBA15}}>
                 <ActivityIndicator size="large" color={COLORS.OrangeRed}/>
@@ -88,7 +84,7 @@ const ScreenWrapper : React.FC<ScreenWrapperProps> = ({maxIndexVisited,component
         )
     }
     return component(navigation);
-}
+})
 
 const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (navigation: any) => React.JSX.Element ,width:number }[], navigation: any }> = ({screens,navigation}) => {
 
@@ -102,27 +98,26 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
     const [ tabWidths,setTabWidths ] = useState<number[]>(screens.map(screen=>screen.width));
     const [ tabPosX,setTabPosX ] = useState<number[]>(tabWidths)
 
-    const onItemLayout = (index:number) => (event:any) => {
+    const tabWidthsRef = useRef<number[]>([]);
+    const tabPosXRef = useRef<number[]>([]);
+
+    const onItemLayout = useCallback((index:number) => (event:any) => {
+        
         const { width } = event.nativeEvent.layout;
 
-        setTabWidths((prevWidths)=>{
-            const newWidths = [...prevWidths];
-            newWidths[index]  = width;
-            return newWidths;
-        })
+        tabWidthsRef.current.push(width);
 
-        setTabPosX((prevPosX)=>{
-            const  newPosX = [...prevPosX];
-
-            if(index>=1){
-                newPosX[index] = newPosX[index-1] + tabWidths[index-1] + 6;
-            }
-            else {
-                newPosX[0] = 10;
-            }
-            return newPosX;
-        })
-    };
+        if(index>=1){
+            tabPosXRef.current.push(tabPosXRef.current[index-1] + tabWidthsRef.current[index-1] + 6);
+        }
+        else {
+            tabPosXRef.current.push(10);
+        }
+        if (tabWidthsRef.current.length === screens.length && tabPosXRef.current.length === screens.length) {
+            setTabWidths([...tabWidthsRef.current]);
+            setTabPosX([...tabPosXRef.current]);
+        }
+    },[screens])
 
     const indicatorOffset = useMemo(() => {
         return scrollX.interpolate({
@@ -155,7 +150,7 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
         });
     }, [scrollX, screens, tabPosX, tabWidths, width]);
 
-    const handleOnScroll = (event:any) => {
+    const handleOnScroll = useCallback((event:any) => {
         Animated.event(
             [
                 {
@@ -216,7 +211,7 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
         if(scrolledRatio>=.285) {
             tabListRef.current?.scrollToOffset({offset:correspondingOffset,animated:true});
         }
-    };
+    },[scrollX,tabListRef,tabPosX,tabWidths,width]);
     
 
     const handleOnViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -230,7 +225,7 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
 
 
     return (
-        <View style={{flex:1}}>
+        <View style={{flex:1,zIndex:-1}}>
             <View>
                 <FlatList ref={tabListRef}
                 horizontal 
@@ -240,6 +235,7 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
                 showsHorizontalScrollIndicator={false}
                 scrollEventThrottle={16}
                 scrollEnabled={false}
+                initialNumToRender={screens.length}
                 style={[styles.header]}
                 contentContainerStyle={{gap:SPACING.space_6,paddingHorizontal : SPACING.space_10}}
                 renderItem={({item,index})=>(
@@ -259,6 +255,7 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
                 showsHorizontalScrollIndicator={false}
                 onScroll={handleOnScroll}
                 scrollEventThrottle={16}
+                initialNumToRender={1}
                 // viewabilityConfig={{
                 //     itemVisiblePercentThreshold: 50,
                 //     minimumViewTime : 100
@@ -270,8 +267,9 @@ const ScreenSelectionCarousal:React.FC<{ screens : { name:string,component: (nav
                 // }}
                 style={{flex:1}}
                 renderItem={({item,index})=>(
-                    <ScreenWrapper maxIndexVisited={maxIndexVisited} component={item.component} index={index} navigation={navigation}/>
-                )}/>
+                    <ScreenWrapper isShow={index<=maxIndexVisited} component={item.component} navigation={navigation}/>
+                )}
+            />
         </View>
     )
 }

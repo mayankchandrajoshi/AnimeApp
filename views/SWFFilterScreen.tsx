@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../themes/themes'
 import swfFilterStore from '../store/swfFilterStore';
 import statusBarHeight from '../utils/getStatusBarHeight';
+import * as NavigationBar from 'expo-navigation-bar';
 
 const { height } = Dimensions.get("screen");
 
@@ -11,6 +12,10 @@ const SWFFilterScreen = () => {
     const { isSWFEnabled,enableSWF,disableSWF } = swfFilterStore();
 
     const [ swfEnabled, setSwfEnabled] = useState(isSWFEnabled);
+
+    useEffect(()=>{
+        NavigationBar.setBackgroundColorAsync(COLORS.Black);
+    },[])
 
     useEffect(() => {
         const handler = setTimeout(() => {
