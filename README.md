@@ -1,3 +1,6 @@
+App link : https://expo.dev/accounts/mayankjoshi9871/projects/animeapp/builds/2b4a1852-b8b4-476f-beee-2903a35ebfa9
+
+
 Video demonstrations : 
 
 
